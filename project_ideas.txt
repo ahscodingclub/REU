@@ -1,0 +1,9 @@
+the maximum gain ratio of splitting was 0, there is no split that can be made which will
+  result in acceptable numbers of cases at the parent and child nodes (given by n p and n c parameters), all the BBA’s at the
+  node are equivalent, or all features have already been used to split
+
+Cohen's kappa coefficient
+
+strength of agreement presented in 2009 paper
+
+info about image feature extraction available in 2009 paper 

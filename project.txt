@@ -1,0 +1,9 @@
+Leverage label uncertainty to make more confident and reliable diagnosis using the LIDC (JF)
+
+a. How to handle the label uncertainty?
+
+i. Distribution versus single label
+
+b. Define new metrics/outcomes for CAD
+
+i. confidence

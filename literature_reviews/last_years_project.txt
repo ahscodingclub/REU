@@ -1,0 +1,39 @@
+Journal Name: SPIES
+Study Title: Building confidence and credibility into CAD with belief decision trees
+Authors: Rachael N. Affenit, Erik R. Barns, Jacob D. Furst, Alexander Rasin, Daniela S. Raicu
+ 
+Summary: build classification system for learning from and predicting the whole distribution of 
+          radiologists’ annotations
+         incorporating conformal prediction (CP) into the classifier
+ 
+ 
+ 
+Data set: Annotated LIDC
+
+Size: 809 annotated, increased to 850 by selective under and over sampling  
+ 
+Features: image data, the radiologists’ nodule outlines, and the radiologists’ subjective
+            ratings of nodule characteristics 
+ 
+Modality: CT
+ 
+public or private?: Public
+ 
+Methodology: Belief Decision Trees with Selective iterative classification and Conformal Prediction with 
+              the addition of label weighting and label distrobutions for the improvement of classification
+              accuracy
+ 
+Results: 84% accuracy of classifying 2 label weighted lung nodule images for malignancy 
+ 
+Limitations: more ratings for the end user as to help integration into real world applications
+ 
+Goal: classifying malignant lung nodules with confidence 
+ 
+Strengths: the use of examples helped understanding of methodologies 
+           informing graphs showed the true nature of results 
+
+Weaknesses: a few wording situations lead to conclusions (might not have been final copy)
+            short conclusion that did not give significance to findings
+ 
+Reference: last_years_project.pdf 
+

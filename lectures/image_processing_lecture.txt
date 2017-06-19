@@ -1,0 +1,52 @@
+* This is just one piece of medical informatics
+* Radiologists asses images for the documented study
+* an image is a digital representation of a real world scene
+* Pixels are parameterized by position, intensity and time
+* discreteness of space: the space is not fully contained
+* intensity: most cameras have 256 levels of intensity
+* rgb is an example of intensity (of each channel)
+* more intensity helps mammography 
+* meta-precision how much precision do you capture, store and display?
+* x,y,z,t,i -- how to formalize the R of images
+** Normally 
+* two spacial parameters -- x and y
+* three intensity parameters (R,G,B)
+** Ultrasound
+* same two spacial parameters (sometimes 3 in cardiology)
+* 1 intensity parameter (ultrasound reflection)
+* 1 time parameter 
+** False color imaging -- assigning color based on intensity (Self organizing maps?)
+  * this may add false edges
+  * color edge versus intensity edge
+** Digital X-Ray
+* Two spatial -- x and y 
+* A single intensity parameter -- x-ray attenuation -- reduction of x-ray signal
+** Digital Video
+* same two spatial, three intensity, one time parameter -- frame #
+** Other kinds of images
+* Computed Tomography -- 3d x-ray
+* Satellite imagery -- 4 intensities rgb and infrared
+* Functional Magnetic Resonance Images -- 3d images of the body overtime
+* Not all images represent visual phenomena but a visualization can be a 
+  very effective way to understand the phenomena 
+** Pixels
+* Give the image a name I or F
+* Specify all of the parameters of the image
+* the result is the intensity
+** CT IS ALWAYS IN 3D
+* Image processing attempts to restoring, enhancing and understanding images
+** Restoration
+  * remove noise
+  * restoring old images
+** Enhancement
+  * used to enhance the contrast
+  * some can work in smaller neighborhoods
+* Image understanding contains different tasks
+  * segmentation -- identifying objects
+  * classification -- assigning labels to pixels
+  * interpretation -- extracts meaning from the image as a whole
+* Creating Images
+  * spatial sampling 
+  * quantization -- intensity sampling -- levels of intensity
+  * spatial sampling rates affect details
+* we are less sensitivie to quantization then resolution changes

@@ -1,0 +1,19 @@
+* Journals
+  Journal of Digital Imaging
+  Medical Physics Journal
+  Academic Radiology              all are from SIIM Conference 
+  Radiology / Radiographics -- RSNA Conferences after thanksgiving for 5 days 
+                                  for all new machinery 
+  IEEE/ACM (sign up for this to make confernces less) -- publishing to here 
+  IEEE Transactions -- very hard to get into this journal, very technical 
+  IEEE Transactions on medical imaging 
+  IEEE Transactions on Image Processing 
+  IEEE Transactions on Pattern Analysis and Machine Intelligence (PAMI)
+  ACMP Transactions on Knowledge Discovery
+* Conferences (Proceedings)
+  SPIE Medical Imaging
+  IEEE International Conference on Image Processing (ICIP)
+  IEEE International Conference on Data Mining      (ICDM)
+  Data Mining in Bioinformatics and Healthcare Workshop 
+  ACM Knowledge Discovery in Databases                                        kdnuggets.com
+  IEEE International Conference on Machine Learning Applications (ICMLA)

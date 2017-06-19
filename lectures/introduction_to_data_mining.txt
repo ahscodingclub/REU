@@ -1,0 +1,101 @@
+Supervised
+  Prediction
+    Regressoin
+    K-Nearest-Neighbor
+  Classificiation
+    
+* Data minining is finding patterns in and analysing large
+  amounts of data
+* Data mining is not querying
+* people that bought these items are likely to buy this other item
+* Data -Selection-> Target Data -Preprocessing-> Preprocessed Data  
+   -Transformation-> Transformed Data -Data Mining-> Patterns -Interpretation-> Knowledge
+* Most effort will be in cleaning and prepairing the data
+** Creating a target dataset
+  * select a data set
+  * row is and object, column is a feature
+  ***This encapsulation is called a data frame
+** Data cleaning
+  * remove noise or outliers
+  * identify the outliers and determine the correct course of action
+* maybe generate new entries that smooth out the data
+* maybe add more features that smooth out the data
+* must look at outlying features, such as click velocity 
+** Data reduction and projection
+  * could remove redundant features
+  * need dimensionality reduction for effiection
+  * feature selection -- selecting features to use in a model
+  * feature extraction -- determining how many dimensions are really needed to 
+      capture the data
+** Choosing the data mining task
+  * clustering
+** Choosing the data mining algorithms
+  * supervised -- (classification) or (regression)
+    (regression -- linear/rgm/svt/gpr/ensemble methods/decision trees/neural networks)
+  * unsupervised -- an internal representation is created to analyze the data
+                    (clustering)
+** Data Mining 
+  * searching for patterns of interest in a particular representation form or a set of 
+    uch representation
+**** WHY DID THE MODEL IMPROVE THE ACCURACY OF THE PREDICTION ****
+** Interpretation and analysis of model
+
+
+** Supervised Learning
+  * the machine learning task of inferring a function from labeled training data
+  * each example is a pair of consisting of an input (vector) and a desired output
+  * Decision Trees, Naive Bayes, KNN, SVN, Regression, Neural Nets
+** Prediction
+  * Create a model for training data that can predict a value for new examples 
+  * Regression
+    * E(y) = B(0) + B(1)X(1) + B(2)X(2)+ B(3)X(1)X(2) + B(4)X(1)^2+ B(5)X(2)^2
+    * B(0) -- y intercept
+    * B(1) and B(2) -- shifing surface
+    * B(3) -- rotation of the surface
+    * B(4) and B(5) -- Signs and values control curvature of the surface
+    * B(X) may be qualitative or quantitive
+* after a pattern has been mined, the pattern must be explained 
+* K nearest neighbor (Predictor and Classifier)
+  * similarity metrics are important
+  * euclidian distance, cosign similarity (documents)
+* Data matrix, cols = features, rows = objects
+  * n data points with p dimensions
+  * distance or similarity metrics
+* Minkowski distance -- a popular distance measure
+  h=1 -- manhatan distance (grid like distance)
+  h=2 -- euclidian distance
+* Vector based similarity
+  * cosin similarity 
+* Prediction -- searching for coeffictients or finding nearest neighbors
+* Classification -- each record is a predefined class, training set is all instances for learning used
+    * need to evaluate the accuracy of the model
+  * Decision Trees -- is like a flow chart, internal nodes test on an attribute, branch represents the outcome 
+      of a test, leaf nodes are the classification
+  * ID3 algo used for this to find the best feature (or C4.5)
+  * information gain is trying to fin the most discriminating feature
+    I(p,n) = -Pr(P)logPr(P)-Pr(N)logPr(N) -- testing for purity
+* Bayes Theorum P(A|B) = P(B|A)
+                 P(B)     P(A)    P(H|E) = P(E|H)P(H)  H-hypothesis E-evidence
+  Naieve bayes -- P(E|C(i)) = P( e1 and e2 ... |c(i)) = Product(e(j)|c(i))
+                                               P(E)
+** Clustering -- unsupervised algorithm
+  * finding a representational individual of a group
+  * hard clustering -- each individual is in one cluster
+  * soft clustering -- probabilities of each cluster
+* Partition
+  * K means/mediods DIFFERENT FROM KNN
+  * calculating similarity to the mean of each cluster, reassign cluster center
+  * O(tkn)
+* Heirarchichal clustering
+  * clusters may have subclusters
+  * start with every object in its own cluster
+  * find the pair that is most similar
+  * calculate center of cluster
+  * repeat
+* a good representation is a dendrogram O((n)(n-1)/2) n^3 or n^2log(n)
+  * phylogenic tree
+* Association rules
+  THINK PROLOG
+  Item set, Support count (Frequncy fo occurences in an itemset)
+  confidence of associtaion rules, how frequently the rule works
+  rules can have a lot of lift

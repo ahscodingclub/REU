@@ -1,0 +1,47 @@
+Journal Name: Algorithms
+Study Title: Predicting Radiological Panel Opinions Using a Panel of Machine Learning Classifiers
+Authors: Dmitriy Zinovev, Daniela Raicu, Jacob Furst and Samuel G. Armato III
+ 
+Summary: This paper uses an ensemble of classifiers and active learning strategies to
+          predict radiologists’ assessment of the nodules of the Lung Image Database Consortium
+          (LIDC). In particular, the paper presents machine learning classifiers that model agreement
+          among ratings in seven semantic characteristics. The ensemble of classifiers (which can be considered as
+          a computer panel of experts) uses 64 image features of the nodules across four categories 
+          to predict semantic characteristics. The active learning
+          begins the training phase with nodules on which radiologists’ semantic ratings agree, and
+          incrementally learns how to classify nodules on which the radiologists do not agree. Using
+          the proposed approach, the classification accuracy of the ensemble of classifiers is higher
+          than the accuracy of a single classifier.
+ 
+ 
+ 
+Data set: LIDC
+Size: 914 nodules from 207 patients
+ 
+Features: spiculation, lobulation, texture, sphericity, margin, subtlety, and malignancy
+ 
+Modality: Thoratic CT
+ 
+public or private?: Public 
+ 
+Methodology: the use of an ensemble of classifiers and active learning strategies to
+              predict radiologists’ assessment of the nodules using a kappa statistics interpretation scale
+             Selecitve Iterative Classification through the Decorative Algorithm
+ 
+Results: using nodules with a high level of agreement as initially labeled data and automatically labeling 
+          the data on which disagreement exists, the proposed approach can correctly predict 70% of the 
+          instances contained in the dataset.
+ 
+Limitations: May not be used in field until higher accuracy is seen 
+ 
+Goal: to increase consistency among radiological interpretations of lung nodule characteristics
+ 
+Strengths: lots of data for the reader to evaluate in the form of graphs and tables 
+           visuals of algorithms lead to a more intuitive understanding 
+
+Weaknesses: results section takes a lot of close attention to see the success of the final result, however
+              this is cleared up in the conclusion secition
+            Data set specifics vary quite a bit, however normalization techniques are mentioned 
+ 
+Reference:  2009_project.pdf 
+

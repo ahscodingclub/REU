@@ -1,0 +1,61 @@
+Journal Name: International Journal of Approximate Reasoning
+Study Title: Belief decision trees: theoretical foundations
+Authors:Zied Elouedi, Khaled Mellouli , Philippe Smets
+ 
+Summary: A mathematical explanation of the concepts used behind belief decision trees 
+ 
+Data set: N/A
+
+Size: N/A
+ 
+Features: N/A
+ 
+Modality: N/A
+ 
+public or private? N/A 
+ 
+Methodology: 
+          Belief decision trees are used for supervised learning
+            and function by breaking down complicated class definitions
+            into a set of less complicated definitions
+          Normal decision trees are unfit to deal with uncertainty in both
+            construction of the tree and the use of three for classification
+          Two types of belief decision trees include probabilistic and fuzzy 
+            decision trees 
+          The major objective of the probabilistic decision trees is to classify instances
+            with missing or uncertain attribute values where the uncertainty is represented
+            by a probability
+          The fuzzy decision trees have been developed to cope with data where both
+            the class and the attributes are represented by fuzzy values
+          def: pignistic -- a decision made when required to make a decision
+          ID3 and C4.5 are some of the most popular algorithms for building belief decision trees
+            followed by CART 
+          Majority of algoirthms build a tree from top down (TDIDT) 
+          Information gain is used as a metric of features to select the operating feature for 
+            each decision node, the higher the information gain, the better the feature splits the  
+            data set 
+          Growth of a subdecision tree stops when the set at a node of the decision tree all belong
+            to one class
+          The (basic belief assingment) bba m is a function m : 2^(|set of classes|) --> [0, 1] such that 
+            the sum off mass over the set of attributes of the classes equals 1, or in a special case 0
+          The (basic belief mass) bbm, represents the part of belief exactly committed to the subset A of theta given a piece of evidence
+            it represents the speci®c support given to A
+          Entropy of the bba functions is important to be able to properly pignistically select a clase at the leaf   
+            level operations
+          we would like that the probability in a leaf points essentially to one class, and entropy is an excellent measure to
+            quantify this tendency the use of the entropy computed from the average probability function in a leaf is plainly justified
+ 
+Results: An understanding of belief decision trees
+ 
+Limitations: Many concepts were presented so exemplifying concepts was difficult
+ 
+Goal: Explain the theoretical foundations of belief decision trees 
+ 
+Strengths: Very well organized, and the organization is described beforehand, which allows for readers 
+            to know what is described in a section before reading, which takes out some guess work
+
+Weaknesses: gives the set of notations after most are needed, although they are descibed in detail in
+              the table, in tabular form it is extremely digestable and should have been presented earlier  
+ 
+Reference: Belief Decision Trees: Theoretical Foundations
+
