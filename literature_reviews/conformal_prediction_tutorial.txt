@@ -1,0 +1,32 @@
+Journal Name: Journal of Machine Learning Research 9 (2008) 371-421
+Study Title: A Tutorial on Conformal Prediction
+Authors:Glenn Shafer, Vladimir Vovk
+ 
+Summary: A tutorial using conformal prediction to determing how confident one can be in the 
+          output of a predictive model 
+         Confidence says less than probability
+ 
+ 
+Data set: Czuber’s numbers 
+Size: N/A
+ 
+Features: scalar however are normally distributed
+ 
+Modality: n/a
+ 
+public or private?: public
+ 
+Methodology:
+ 
+Results:
+ 
+Limitations:
+ 
+Goal:
+ 
+Strengths: 
+
+Weaknesses: 
+ 
+Reference: 
+

@@ -1,0 +1,46 @@
+Journal Name:
+Study Title: Machine learning classification with confidence: Application of transductive
+              conformal predictors to MRI-based diagnostic and prognostic markers in depression
+Authors: Ilia Nouretdinov, Sergi G. Costafreda, Alexander Gammerman, Alexey Chervonenkis, Vladimir Vovk,
+                Vladimir Vapnik, Cynthia H.Y. Fu
+ 
+Summary: TCP generates the most likely prediction and a valid measure of confidence, as well 
+            as the set of all possible predictions for a given confidence level
+         processing of MRI data is done to provide a confidence of the individual having a 
+          neurological depressive disorder
+         A conformity measure is how well the current input matches other inputs that 
+          the model was trained on, ensuring confidence in the classification
+ 
+Data set: (FDx) dataset contained functional MRI data from 19 patients with depression and 19 matched healthy controls 
+          (SPx) dataset consisted of structural MRI data in 18 patients with depression who subsequently received
+            treatment with antidepressant medication. Following 8 weeks oftreatment, 9 of the 18 patients achieved 
+            a full clinical remission based on standard clinical response criteria
+
+Size: (19X2)(18X2)
+ 
+Features: MRI Images with associated prognosis
+ 
+Modality: MRI
+ 
+public or private?: public 
+ 
+Methodology: using TCP to attempt to classify with a confidence rating what neurological markers
+              are evident in depressed individuals as to classify them properly as experiencing 
+              or not experiencing depression ontop of a pre-studied svm setup
+ 
+Results: TCP analysis revealed that increased BOLD responses activity in the dorsal anterior cingulate, superior frontal and
+          precentral cortices during implicit processing of high-intensity sad faces classified patients with depression,
+          while increased activity in the insula, angular cortex and cerebellum predicted healthy control status
+ 
+Limitations:
+ 
+Goal: identify neurological markers of depression
+ 
+Strengths: to the point, building off of previous work
+           very readable results table
+        
+
+Weaknesses: example images were saved until the end of the paper 
+            a lot of details relied on previous work 
+ 
+Reference: 
