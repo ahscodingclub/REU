@@ -1,0 +1,34 @@
+Classifying with BDT Parameters (d =  20 , np =  26 , nc =  13 , k =  5 ):
+
+Fold Info
+Fold Info
+Fold Info
+Fold Info
+Fold Info
+Best fold at k =  5
+
+ Training Confusion Matrix
+[[289  51]
+ [ 98 144]]
+
+ Training MOD Confusion Matrix
+ [ 0.299  0.223] 
+ [ 0.213  0.265] 
+
+Accuracy =  74.4 %
+MOD Accuracy =  56.42 %
+AUCdt JD =  0.05348  with error of  5.658e-05
+Avg ROC AUC =  0.744
+
+ Testing Confusion Matrix
+[[84  5]
+ [35 46]]
+
+ Testing MOD Confusion Matrix
+ [ 0.3    0.208] 
+ [ 0.234  0.258] 
+
+Accuracy =  76.47 %
+MOD Accuracy =  55.82 %
+AUCdt JD =  0.04273  with error of  6.93e-06
+Avg ROC AUC =  0.7647

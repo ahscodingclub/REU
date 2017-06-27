@@ -1,0 +1,38 @@
+Classifying with BDT Parameters (d =  25 , np =  24 , nc =  12 , k =  6 ):
+
+
+ Training Confusion Matrix
+[[90 11  8  6  0]
+ [46 26 58  2  5]
+ [39 21 54 25 15]
+ [22  8  7 26 28]
+ [20  0  1 26 63]]
+
+ Training MOD Confusion Matrix
+ [ 0.11   0.023  0.038  0.012  0.007] 
+ [ 0.043  0.044  0.063  0.027  0.016] 
+ [ 0.069  0.054  0.08   0.039  0.035] 
+ [ 0.035  0.027  0.042  0.03   0.043] 
+ [ 0.027  0.015  0.028  0.028  0.066]
+Accuracy =  42.67 %
+MOD Accuracy =  33.02 %
+AUCdt JD =  0.2031  with error of  0.0003215
+Avg ROC AUC =  0.7364
+
+ Testing Confusion Matrix
+[[20  2  3  0  0]
+ [ 8  6 16  2  1]
+ [13  4 16  0  5]
+ [ 4  0  2 10  6]
+ [ 4  0  1  7 11]]
+
+ Testing MOD Confusion Matrix
+ [ 0.097  0.025  0.039  0.01   0.004] 
+ [ 0.045  0.045  0.066  0.03   0.022] 
+ [ 0.07   0.058  0.089  0.04   0.027] 
+ [ 0.037  0.027  0.044  0.031  0.039] 
+ [ 0.025  0.015  0.028  0.027  0.059]
+Accuracy =  44.68 %
+MOD Accuracy =  32.13 %
+AUCdt JD =  0.2256  with error of  0.0006197
+Avg ROC AUC =  0.7624
