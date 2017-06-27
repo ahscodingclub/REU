@@ -1,0 +1,67 @@
+Function List: 
+
+importIdData(set_name): set_data_array, set_header
+
+importAllData(set_name): LIDC_Data, header
+
+setTrain(trn_data_array): train_features, calib_features
+
+getPigns(dataset): nodePigns
+
+five_to_two(lst): [pb, pm]
+
+calcEntrop(dataset): entrop, Apign, nodePigns
+
+splitData(dataset,splitFeat,splitValue): lowSet, highSet
+
+bestFeatureSplit(dataset, nFeat, min_parent, min_child): 
+
+all_same(items)
+
+createTree(dataset, labels, min_parent, min_child, curr_depth, max_depth)
+
+classify(inputTree, featLabels, testVec)
+
+getMax(lst)
+
+Train_Conformity(actual, predicted)
+
+Test_Conformity(predicted)
+
+PValue(test, calib)
+
+getConfusionMatrix(predicted, actual)
+
+getAccuracy(class_matrix)
+
+sum2D(input)
+
+modConfusion(pred, actual)
+
+CosineSimilarity(predicted, actual)
+
+getROC(predicted, actual)
+
+JeffreyDistance(v1, v2)
+
+JeffreyDistance(v1, v2)
+
+My_emd(v1, v2)
+
+EMD2(v1, v2)
+
+AUCdt(x, actual, predicted)
+
+writeData(trainOrTest, header, filename, params, actual, predicted, conf, cred, classes, accuracy, id_start)
+
+getTrees(tf, head, np, nc, mind, md, switch)
+
+draw(parent_name, child_name)
+
+visit(node, parent=none)
+
+plotVio(old, category, a, axes, xlabel, ylabel)
+
+violin(conf, cred, category, xlabel, show)
+
+main . . .

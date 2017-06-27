@@ -1,0 +1,33 @@
+Journal Name: Fuzzy Sets and Systems 122 (2001) 409–424
+Study Title: Handling possibilistic labels in pattern classi#cation using evidential reasoning
+Authors: Thierry Den'ux, Lalla Meriem Zouhal
+ 
+Summary: Two approaches are proposed, based either on the transformation of each possibility distribution into 
+          a consonant belief function, or on the use of generalized belief structures with fuzzy focal elements
+         Methods for combining multiple experts data for a label are discussed, and a fuzzy vector is presented
+          that represents the likelihood of class membership for each of the k classes  
+         Non zero elements in a BBA are called focal elements
+ 
+Data set:
+Size: 
+ 
+Features:
+ 
+Modality: 
+ 
+public or private?: 
+ 
+Methodology:
+ 
+Results:
+ 
+Limitations:
+ 
+Goal:
+ 
+Strengths: 
+
+Weaknesses: 
+ 
+Reference: 
+

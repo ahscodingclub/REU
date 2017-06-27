@@ -1,0 +1,6 @@
+jeffrey hinton -- youtube -- numenta
+
+* learning of good features occurs first (unsupervised), then the learning of labels with necessary feautres (supervised)
+* distributed representation uses each index as the presence of a feature
+* generative models learn features while discrimitive models learn values of features to discriminate classes
+* RBM, Autoencoders

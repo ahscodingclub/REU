@@ -1,0 +1,33 @@
+Journal Name: N/A 
+Study Title: Learning On Probabilistic Labels
+Authors: Peng Peng, Raymond Chi-Wing Wong, Phillp S. Yu 
+ 
+Summary: Sometimes in a clear cut dataset, some informatoin is lost, due to the forced decision
+         A noise-insensitive classifier is presented to learn probababilistic labels given that some 
+          of the labels may be of low quality 
+         A method for deriving the error bounds of a classifier with probabilistic bounds on a data set 
+          of known size is presented
+ 
+Data set: wine-red dataset
+Size: 
+ 
+Features:
+ 
+Modality: 
+ 
+public or private?: 
+ 
+Methodology:
+ 
+Results:
+ 
+Limitations:
+ 
+Goal:
+ 
+Strengths: 
+
+Weaknesses: 
+ 
+Reference: 
+

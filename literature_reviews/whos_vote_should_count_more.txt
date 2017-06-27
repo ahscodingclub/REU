@@ -1,0 +1,35 @@
+Journal Name:
+Study Title: Whose Vote Should Count More: Optimal Integration of Labels from Labelers of Unknown Expertise
+Authors: Jacob Whitehill, Paul Ruvolo, Tingfan Wu, Jacob Bergsma, and Javier Movellan
+ 
+Summary: Machine learning algorithms require a large amount of data to be trained which is hard to collect. Sometimes
+          training data can be skewed for a label, and this can be based on range of expertise of the labeler and difficulty
+          of the image to label, which can lead to the difficulty of how to use all of the data, while eliminating noise,     
+          possibly by combining the data in some form of distrobution
+
+ 
+ 
+ 
+Data set:
+Size: 
+ 
+Features:
+ 
+Modality: 
+ 
+public or private?: 
+ 
+Methodology:
+ 
+Results:
+ 
+Limitations:
+ 
+Goal:
+ 
+Strengths: 
+
+Weaknesses: 
+ 
+Reference: 
+

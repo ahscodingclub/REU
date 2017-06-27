@@ -1,0 +1,27 @@
+* do not overpresent -- only present big ideas 
+* give them a sense about what you are diong
+* encourage them to read the paper 
+* know your audience
+* tell people the results before hand, and present how you got there
+* leave them with what the problem was and why your work was important
+* show extreme cases, or a baby case 
+* if time is of the essence, keep the example and lose the general case 
+* have a running outline of the steps of the process
+* be familiar with all of the related work
+* kdd has posted some professional presentations
+* if the presentation is associated with the paper, leave technical details out
+* if there is something that people need to see, present it
+* prepare backup slides to answer questions
+* show that your problem is current
+* WHAT IS YOUR CONTRIBUTOIN
+* what am I going into next
+* be consistant in color, size and font
+* not too much text
+* showing one point at a time will prevent the audiance from reading ahead
+* use a standard font, at a readable size
+* simple is better 
+* graphs are helpful 
+* charts and tables may not be intuitive
+* practice and time your presentation
+* "this is a little bit beyond the scope of the project, I can adress your question after"
+* "great suggestion, we can talk afterwards" 
