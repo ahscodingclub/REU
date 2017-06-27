@@ -111,7 +111,7 @@ def getPigns(dataset):
                     zeroratings += currentLabel.count(i)
                 else:
                     pign.append(currentLabel.count(i))
-                pign[:] = [float(x) / (4 - zeroratings) for x in pign] 
+            pign[:] = [float(x) / (4 - zeroratings) for x in pign] 
 
         nodePigns.append(pign) # Add pign to list of pigns
     return nodePigns
@@ -331,7 +331,6 @@ def Test_Conformity(predicted):
             cls = predicted[i][j]  # chosen class label
             max_val = max([prob for k,prob in enumerate(predicted[i]) if k != j]) # max val of remaining class labels
             conf_score.append(cls-max_val) # chosen - max remaining value
-        print("pred: ", [round(x,2) for x in predicted[i]], " test conf: ", [round(x,2) for x in conf_score])
         conform.append(conf_score) # append conformity score
     return conform
     
@@ -403,8 +402,43 @@ def JeffreyDistance(v1,v2):
 #####################################
 # OUTPUT RESULTS DATAFILES
 #####################################
-def writeData(trainOrTest, header, filename, params, actual, predicted, conf, cred, classes, accuracy, id_start):
+def writeData(trainOrTest, header, filename, params, actual, predicted, conf, cred, classes, accuracy, p_vals, id_start):
+    with open(filename, params) as csvfile:
+        writer = csv.writer(csvfile, delimiter=',',
+                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        if trainOrTest == "Training":
+            writer.writerow(['Nodule ID',\
+                             'Actual [1]',      'Actual [2]',       'Actual [3]',       'Actual [4]',       'Actual [5]',\
+                             'Predicted [1]' ,  'Predicted [2]',    'Predicted [3]',    'Predicted [4]',    'Predicted [5]',\
+                              header])
+        else:
+            writer.writerow(['Nodule ID',\
+                             'Actual [1]',      'Actual [2]',       'Actual [3]',       'Actual [4]',       'Actual [5]',\
+                             'Predicted [1]' ,  'Predicted [2]',    'Predicted [3]',    'Predicted [4]',    'Predicted [5]',\
+                             'Confidence', 'Credibility', 'Sureness of Case', 'Classes', header])
+            testConform = Train_Conformity(predicted, actual)
+
+        
+        for i in range(0, len(predicted)):
+            # Write data and similarity measures to file
+            if trainOrTest == "Training":
+                writer.writerow([set_data_array[i+id_start][2],\
+                                 actual[i][0], actual[i][1], actual[i][2], actual[i][3], actual[i][4],\
+                                 predicted[i][0], predicted[i][1], predicted[i][2], predicted[i][3], predicted[i][4],\
+                                ])
+            else:
+                writer.writerow([set_data_array[i+id_start][2],\
+                                 actual[i][0], actual[i][1], actual[i][2], actual[i][3], actual[i][4],\
+                                 predicted[i][0], predicted[i][1], predicted[i][2], predicted[i][3], predicted[i][4],\
+                                 conf[i], cred[i], testConform[i], classes[i]])
+        
+        # For each case at this node
+        #print(len(actual),len(predicted))
+     
     # Calculate Accuracy and AUCdt
+
+
+
     confusion = getConfusionMatrix(predicted, actual)
     myAccuracy = getAccuracy(confusion)
     
@@ -653,10 +687,14 @@ confidence = k_best[6]
 credibility = k_best[7]
 classes = k_best[8]
 
+print("length of actual test: ", len(actualTest))
+print("length of train_labels: ", len(trainLabels)) 
+print("length of p vals: ", len(p_vals)) 
+
 print ("\nWriting Data for best fold k =", k_best[0], "...") 
 
-writeData("Training", trainhead, "../output/TrainOutput.csv", "wb", actualTrain, trainLabels, confidence, credibility, classes, accuracy, 0)
-writeData("Testing", testhead, "../output/TestOutput.csv", "wb", actualTest, testLabels, confidence, credibility, classes, accuracy, len(trainLabels))
+writeData("Training", trainhead, "../output/TrainOutput.csv", "wb", actualTrain, trainLabels, confidence, credibility, classes, accuracy, p_vals, 0) 
+writeData("Testing", testhead, "../output/TestOutput.csv", "wb", actualTest, testLabels, confidence, credibility, classes, accuracy, p_vals, len(trainLabels))
 
 
 violin(confidence, credibility, classes, 'Classification', 'show')
