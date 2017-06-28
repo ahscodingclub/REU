@@ -66,7 +66,4 @@ ultrasound is normally a second look at suspicious candidates of breast cancer
 contrast enhanced mri is also used for breast imaging -- temporal aspect gives a lot of idication
 of malignancy 
 
-
-
-
-
+Pet ct scans

@@ -300,55 +300,6 @@ def classify(inputTree, featLabels, testVec):
             return classify(secondDict[key][k],featLabels,testVec) # GO LEFT
 
 #####################################
-# CONFORMAL PREDICTION
-#####################################
-
-def getMax(lst):
-    mx = max(lst)
-    mx_vals = []
-    
-    for k,x in enumerate(lst):
-        if x == mx:
-            mx_vals.append(k)
-    if len(mx_vals) == 1:
-        return mx_vals[0]
-    else:
-        return (sum(mx_vals)/len(mx_vals))
-    
-def Train_Conformity(actual, predicted):
-    conform = []
-    for i in range(len(actual)):
-        actual_class = getMax(actual[i]) #maximum value of predicted
-        max_ind = actual_class        
-        pred = predicted[i][max_ind] #probability of predicted chosen predicted label
-        max_val = max([prob for k,prob in enumerate(predicted[i]) if k != max_ind]) #max value in subset without chosen label
-        conform.append(pred - max_val) #append conformity score
-    return conform
-
-def Test_Conformity(predicted):
-    conform = []
-    for i in range(len(predicted)): # for each case
-        conf_score = []
-        for j in range(len(predicted[i])): # for each rating
-            cls = predicted[i][j]  # chosen class label
-            max_val = max([prob for k,prob in enumerate(predicted[i]) if k != j]) # max val of remaining class labels
-            conf_score.append(cls-max_val) # chosen - max remaining value
-        conform.append(conf_score) # append conformity score
-    return conform
-    
-def PValue(test, calib):
-    pvalues = []
-    for i in range(len(test)): # for each case in testing data
-        counts = [0,0,0,0,0] # stores count of test conformity greater than equal to calib 
-        for j in range(0,5): # for each label in test
-            val = test[i][j] # testing conformity score of label
-            for k in range(0,len(calib)): # for each calibration conformity value 
-                if calib[k] <= val: # if less than val increase count of this label
-                    counts[j] += 1
-        pvalues.append([count/float(len(calib)+1) for count in counts]) #append p values for case
-    return pvalues
-
-#####################################
 # EVALUATION METHODS
 #####################################
 
@@ -380,6 +331,15 @@ def getAccuracy(class_matrix): # returns accuracy of misclassification matrix
         accy += class_matrix[j][j]
     return accy / sum2D(class_matrix)
 
+# Calculate the maximum accuracy that can be achieved from a
+# probabilistic label vector
+def getCrediblity(plv_array):
+    max_accuracy = [0]*(len(plv_array))
+    for plv in plv_array:
+        for i in range(len(plv)):
+            max_accuracy[i] += plv[i]*plv[i]*100
+    return max_accuracy
+
 # Sum elements in a 2D array
 def sum2D(input):
     return sum(map(sum, input))
@@ -405,43 +365,7 @@ def JeffreyDistance(v1,v2):
 #####################################
 # OUTPUT RESULTS DATAFILES
 #####################################
-def writeData(trainOrTest, header, filename, params, actual, predicted, conf, cred, classes, accuracy, p_vals, id_start):
-    with open(filename, params) as csvfile:
-        writer = csv.writer(csvfile, delimiter=',',
-                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        if trainOrTest == "Training":
-            writer.writerow(['Nodule ID',\
-                             'Actual [1]',      'Actual [2]',       'Actual [3]',       'Actual [4]',       'Actual [5]',\
-                             'Predicted [1]' ,  'Predicted [2]',    'Predicted [3]',    'Predicted [4]',    'Predicted [5]',\
-                              header])
-        else:
-            writer.writerow(['Nodule ID',\
-                             'Actual [1]',      'Actual [2]',       'Actual [3]',       'Actual [4]',       'Actual [5]',\
-                             'Predicted [1]' ,  'Predicted [2]',    'Predicted [3]',    'Predicted [4]',    'Predicted [5]',\
-                             'Confidence', 'Credibility', 'Sureness of Case', 'Classes', header])
-            testConform = Train_Conformity(predicted, actual)
-
-        
-        for i in range(0, len(predicted)):
-            # Write data and similarity measures to file
-            if trainOrTest == "Training":
-                writer.writerow([set_data_array[i+id_start][2],\
-                                 actual[i][0], actual[i][1], actual[i][2], actual[i][3], actual[i][4],\
-                                 predicted[i][0], predicted[i][1], predicted[i][2], predicted[i][3], predicted[i][4],\
-                                ])
-            else:
-                writer.writerow([set_data_array[i+id_start][2],\
-                                 actual[i][0], actual[i][1], actual[i][2], actual[i][3], actual[i][4],\
-                                 predicted[i][0], predicted[i][1], predicted[i][2], predicted[i][3], predicted[i][4],\
-                                 conf[i], cred[i], testConform[i], classes[i]])
-        
-        # For each case at this node
-        #print(len(actual),len(predicted))
-     
-    # Calculate Accuracy and AUCdt
-
-
-
+def writeData(trainOrTest, filename, actual, predicted):
     confusion = getConfusionMatrix(predicted, actual)
     myAccuracy = getAccuracy(confusion)
     
@@ -540,31 +464,30 @@ def plotVio(old, category, a, axes, xlabel, ylabel):
     axes[a].set_xticklabels(labels)    
     axes[a].set_xlabel(xlabel)
     axes[a].set_ylabel(ylabel)
-    #return v
 
 # DRAW VIOLIN PLOTS FOR CONFIDENCE / CREDIBILITY
-def violin(conf, cred, category, xlabel, show):
+def violin(confidence, credibility, xlabel):
+    category = [1,2,3,4,5]
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
+
     # Confidence
-    plotVio(conf, category, 0, axes,  xlabel, 'Confidence')
+    plotVio(conf, category, 0, axes,  'Classification', 'Confidence')
     axes[0].set_title('Confidence Values at Each ' + xlabel)
     
     # Credibility
-    plotVio(cred, category, 1, axes,  xlabel, 'Credibility')
+    plotVio(cred, category, 1, axes, 'Classification', 'Credibility')
     axes[1].set_title('Credibilty Values at Each ' + xlabel)
     
-    # Show & save figure
+    # Save figure
     figure_dest = f_name[0:-4]+'.png'
     plt.savefig(figure_dest, bbox_inches='tight')
     print("Figure saved in ", figure_dest)
-    if show == 'show' and show != 'hide':
-        plt.show()
     
 #####################################
 # MAIN SCRIPT: Build, Classify, Output
 #####################################       
 # Setup
-#input loop for dist settings
+#input loop for PLV settings
 pignType = None
 while pignType != 1 and pignType != 2 and pignType != 3 and pignType != 4:
     pignType = input("Pignistic Type?\n1.Mean\n2.Median\n3.Mode\n4.Distribution\n\ntype: ")
@@ -593,18 +516,22 @@ elif(var_set == "y"):
 test_header = copy.copy(header)
 
 ###### K-FOLD VALIDATION ######
-if kfolds > 1:
-    kf = KFold(len(LIDC_Data), kfolds)
-else:
-    kf = LIDC_Data
+kf = KFold(len(LIDC_Data), kfolds)
     
 k_round = 1
-k_best = [0,0.0,[],[],[],[],[],[]]
+k_best = [None]*7
+
 trainhead = "Training Data: (d = " + str(maxdepth) + " | np = " + str(nparent) + " | nc = " + str(nchild) + " | k = " + str(kfolds) + ")"
+
 testhead = "Testing Data: (d = " + str(maxdepth) + " | np = " + str(nparent) + " | nc = " + str(nchild) + " | k = " + str(kfolds) + ")"
+
 print("Classifying with BDT Parameters (d = ",maxdepth,", np = ",nparent,", nc = ",nchild,", k = ",kfolds,"):\n",file=f)
 
+# Get actual data
+actualTrain = getPigns(train_features)
+actualTest = getPigns(test_features)
 global graph
+
 for trn_ind, tst_ind in kf:
     trainLabels = []
     testLabels = []
@@ -629,75 +556,52 @@ for trn_ind, tst_ind in kf:
 #    visit(tree)
 #    graph.write_png("BDT.png")
     
-    # Get actual data
-    actualTrain = getPigns(train_features)
-    actualTest = getPigns(test_features)
-    
     # Classify training set
     print ("Classifying Training Set...") 
     for i in range(0,len(train_features)):
             trainLabels.append(classify(tree, test_header,train_features[i]))
-    
-    # Classify calibration set
-    print ("Classifying Calibration Set...") 
-    for i in range(0,len(calib_features)):
-            calibLabels.append(classify(tree, test_header,calib_features[i]))
-    
-    # Compute Calibration Conformity
-    print("Computing Calibration Conformity...")
-    actualCalib = getPigns(calib_features)
-    calib_conf = Train_Conformity(actualCalib, calibLabels)
     
     # Classify testing set
     print ("Classifying Testing Set...") 
     for i in range(0,len(test_features)):
             testLabels.append(classify(tree, test_header,test_features[i]))
             
-    # Compute final conformity and p-values
-    print("Computing Testing Conformity...")
-    test_conf = Test_Conformity(testLabels)
-    p_vals = PValue(test_conf,calib_conf)
-
+    conf_matrix = []
     confidence = []
     credibility = []
-    classes = []
+    accuracy = []
     
-    for i, val in enumerate(p_vals):
-        m = val.index(max(val))
-        sec = max([x for k,x in enumerate(val) if k != m])
-        classes.append(testLabels[i].index(max(testLabels[i]))+1)        
-        confidence.append(1 - sec)
-        credibility.append(max(val))
-    
-    # increase round of k-fold vlaidation
-    conf_matrix = getConfusionMatrix(testLabels, actualTest)
-    accy = getAccuracy(conf_matrix)
+    # Calculate the confusion matrix, accuracy, credibility and confidence 
+    #   of each testing case   
+    for i in range(len(actual_test)):
+        conf_matrix.append(getConfusionMatrix(testLabels[i], actualTest[i]))
+        credibility.append(getCredibility(actualTest))
+        confidence.append(getAccuracy(conf_matrix[i])/credibility[i])
+
     if accy > k_best[1]:
-        k_best = [k_round, accy, actualTrain, trainLabels, actualTest, testLabels, confidence, credibility, classes]
+        k_best = [k_round, actualTrain, trainLabels, actualTest, testLabels, confidence, credibility]
+
+    # increase round of k-fold vlaidation
     k_round += 1
 
 # Output data to csv and text files
-accuracy = k_best[1]
-actualTrain = k_best[2]
-trainLabels = k_best[3]
-actualTest = k_best[4]
-testLabels = k_best[5]
-confidence = k_best[6]
-credibility = k_best[7]
-classes = k_best[8]
-
-print("length of actual test: ", len(actualTest))
-print("length of train_labels: ", len(trainLabels)) 
-print("length of p vals: ", len(p_vals)) 
+actualTrain = k_best[1]
+trainLabels = k_best[2]
+actualTest = k_best[3]
+testLabels = k_best[4]
+confidence = k_best[5]
+credibility = k_best[6]
 
 print ("\nWriting Data for best fold k =", k_best[0], "...") 
 
-writeData("Training", trainhead, "../output/TrainOutput.csv", "wb", actualTrain, trainLabels, confidence, credibility, classes, accuracy, p_vals, 0) 
-writeData("Testing", testhead, "../output/TestOutput.csv", "wb", actualTest, testLabels, confidence, credibility, classes, accuracy, p_vals, len(trainLabels))
+# write training data
+writeData("Training", trainhead, "../output/TrainOutput.csv", actualTrain, trainLabels, confidence, credibility) 
 
+# write testing data
+writeData("Testing", testhead, "../output/TestOutput.csv", actualTest, testLabels, confidence, credibility)
 
-violin(confidence, credibility, classes, 'Classification', 'hide')
+# plot violin plots
+violin(confidence, credibility)
     
 # Close output file
 f.close()
-print("DONE")
