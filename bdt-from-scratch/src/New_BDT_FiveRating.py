@@ -5,6 +5,7 @@ Created on Wed Jul 06 13:54:20 2016
 
 @authors: { Rachael Affenit <raffenit@gmail.com>,
             Erik Barns <erik.barns909@gmail.com> }
+revamped by: { Jake Sauter <jsauter@oswego.edu> }
             
 @INPROCEEDINGS { 
   pele2008,
@@ -65,12 +66,7 @@ def importAllData(set_name):
 ## SET TRAINING DATA 
 def setTrain(trn_data_array):
     global train_features
-    global train_features
-    global calib_features
-
-    split = int((6.0/7.0) * len(trn_data_array))
-    train_features = trn_data_array[:split].tolist() # training data
-    calib_features = trn_data_array[split:].tolist() # calibration data
+    train_features = trn_data_array.tolist() # training data
     
 # EXTRACT DATA
 def getPigns(dataset):
@@ -306,14 +302,14 @@ def classify(inputTree, featLabels, testVec):
 # calculate a confusion matrix given predicted and actual, using full complexity of BBA
 def getConfusionMatrix(predicted,actual):
     print("actual: ", actual)
+    print("predicted: ", predicted)
     conf_mat = [[0,0,0,0,0],
                 [0,0,0,0,0],
                 [0,0,0,0,0],
                 [0,0,0,0,0],
                 [0,0,0,0,0]]
-    for i in range(0,len(predicted)):
-        conf_mat = np.add(conf_mat, cross_product(predicted[i],actual[i]))
-    return conf_mat
+
+    return np.add(conf_mat, cross_product(predicted,actual))
 
 def cross_product(X,Y):
     product = [ [ 0 for y in range(len(Y)) ] for x in range(len(X)) ]
@@ -329,15 +325,14 @@ def getAccuracy(class_matrix): # returns accuracy of misclassification matrix
     accy = 0.0
     for j in range(0,5):
         accy += class_matrix[j][j]
-    return accy / sum2D(class_matrix)
+    return 100 *accy / sum2D(class_matrix)
 
 # Calculate the maximum accuracy that can be achieved from a
 # probabilistic label vector
-def getCrediblity(plv_array):
-    max_accuracy = [0]*(len(plv_array))
-    for plv in plv_array:
-        for i in range(len(plv)):
-            max_accuracy[i] += plv[i]*plv[i]*100
+def getCredibility(plv):
+    max_accuracy = 0 
+    for i in range(len(plv)):
+        max_accuracy += plv[i]*plv[i]*100
     return max_accuracy
 
 # Sum elements in a 2D array
@@ -365,22 +360,19 @@ def JeffreyDistance(v1,v2):
 #####################################
 # OUTPUT RESULTS DATAFILES
 #####################################
-def writeData(trainOrTest, filename, actual, predicted):
-    confusion = getConfusionMatrix(predicted, actual)
-    myAccuracy = getAccuracy(confusion)
-    
-    # Output to Console
-    print("\n" + trainOrTest + "\n")
-    for row in confusion:
-        print(["{0:5.5}".format(str(val)) for val in row])
-    print(trainOrTest,"Accuracy = ", '{:.4f}'.format(myAccuracy * 100), "%")
-    
-    # Output Confusion Matrices, Accuracies, AUCdt, and ROC AUC
-    print("\n", trainOrTest, "Confusion Matrix", file=f)
-    for row in confusion:
-        print(["{0:5.5}".format(str(val)) for val in row], file=f)
-    print("Accuracy = ", '{:.4f}'.format(myAccuracy * 100), "%", file=f)
+def writeData(filename, actual, predicted, confusion, confidence, credibility):
 
+    print("\nTesting \n")
+    for i in range(0,len(confusion)):
+        print("\n\n")
+        #final_confusion = np.add(final_confusion, confusion[i])
+        print("acutal: ", actual[i])
+        print("predicted: ", predicted[i])
+        for row in confusion[i]:
+            print(["{0:5.5}".format(str(val)) for val in row])
+        print("Confidence = ", '{:.4}'.format(confidence[i]))
+        print("Credibility = ", '{:.4}'.format(credibility[i]))
+         
 #####################################
 # DRAW THE DECISION TREE
 #####################################
@@ -466,16 +458,16 @@ def plotVio(old, category, a, axes, xlabel, ylabel):
     axes[a].set_ylabel(ylabel)
 
 # DRAW VIOLIN PLOTS FOR CONFIDENCE / CREDIBILITY
-def violin(confidence, credibility, xlabel):
+def violin(confidence, credibility):
     category = [1,2,3,4,5]
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
 
     # Confidence
-    plotVio(conf, category, 0, axes,  'Classification', 'Confidence')
+    plotVio(confidence, category, 0, axes,  'Classification', 'Confidence')
     axes[0].set_title('Confidence Values at Each ' + xlabel)
     
     # Credibility
-    plotVio(cred, category, 1, axes, 'Classification', 'Credibility')
+    plotVio(credibility, category, 1, axes, 'Classification', 'Credibility')
     axes[1].set_title('Credibilty Values at Each ' + xlabel)
     
     # Save figure
@@ -527,23 +519,22 @@ testhead = "Testing Data: (d = " + str(maxdepth) + " | np = " + str(nparent) + "
 
 print("Classifying with BDT Parameters (d = ",maxdepth,", np = ",nparent,", nc = ",nchild,", k = ",kfolds,"):\n",file=f)
 
-# Get actual data
-actualTrain = getPigns(train_features)
-actualTest = getPigns(test_features)
 global graph
 
 for trn_ind, tst_ind in kf:
     trainLabels = []
     testLabels = []
-    calibLabels = []
     setTrain(LIDC_Data[trn_ind])
     test_features = LIDC_Data[tst_ind].tolist()
+
+    # Get actual data
+    actualTrain = getPigns(train_features)
+    actualTest = getPigns(test_features)
     
     # Console Output
     print("\n K-FOLD VALIDATION ROUND ",k_round," OF ",kfolds)
     print("#################################")
     print("Train Size: ", len(train_features))
-    print("Calibration Size: ", len(calib_features))
     print("Test Size: ", len(test_features))
     print ("Building Belief Decision Tree...") 
     
@@ -573,13 +564,15 @@ for trn_ind, tst_ind in kf:
     
     # Calculate the confusion matrix, accuracy, credibility and confidence 
     #   of each testing case   
-    for i in range(len(actual_test)):
+    for i in range(len(testLabels)):
         conf_matrix.append(getConfusionMatrix(testLabels[i], actualTest[i]))
-        credibility.append(getCredibility(actualTest))
-        confidence.append(getAccuracy(conf_matrix[i])/credibility[i])
+        credibility.append(getCredibility(actualTest[i]))
+        print("credibility: ", credibility)
+        confidence.append(100*getAccuracy(conf_matrix[i])/credibility[i])
+        print("confidence: ", confidence)
 
-    if accy > k_best[1]:
-        k_best = [k_round, actualTrain, trainLabels, actualTest, testLabels, confidence, credibility]
+    if accuracy > k_best[1]:
+        k_best = [k_round, actualTrain, trainLabels, actualTest, testLabels, conf_matrix, confidence, credibility]
 
     # increase round of k-fold vlaidation
     k_round += 1
@@ -589,16 +582,14 @@ actualTrain = k_best[1]
 trainLabels = k_best[2]
 actualTest = k_best[3]
 testLabels = k_best[4]
-confidence = k_best[5]
-credibility = k_best[6]
+confusion = k_best[5]
+confidence = k_best[6]
+credibility = k_best[7]
 
 print ("\nWriting Data for best fold k =", k_best[0], "...") 
 
-# write training data
-writeData("Training", trainhead, "../output/TrainOutput.csv", actualTrain, trainLabels, confidence, credibility) 
-
 # write testing data
-writeData("Testing", testhead, "../output/TestOutput.csv", actualTest, testLabels, confidence, credibility)
+writeData("../output/TestOutput.csv", actualTest, testLabels, confusion, confidence, credibility)
 
 # plot violin plots
 violin(confidence, credibility)
