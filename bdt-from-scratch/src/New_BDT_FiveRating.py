@@ -301,8 +301,6 @@ def classify(inputTree, featLabels, testVec):
 
 # calculate a confusion matrix given predicted and actual, using full complexity of BBA
 def getConfusionMatrix(predicted,actual):
-    print("actual: ", actual)
-    print("predicted: ", predicted)
     conf_mat = [[0,0,0,0,0],
                 [0,0,0,0,0],
                 [0,0,0,0,0],
@@ -556,20 +554,34 @@ for trn_ind, tst_ind in kf:
     print ("Classifying Testing Set...") 
     for i in range(0,len(test_features)):
             testLabels.append(classify(tree, test_header,test_features[i]))
-            
-    conf_matrix = []
-    confidence = []
-    credibility = []
-    accuracy = []
+      
+    # Save training metrics
+    train_conf_matrix = []
+    train_credibility = []
+    train_confidence = []
+
+    # Save testing metrics
+    test_conf_matrix = []
+    test_credibility = []
+    test_confidence = []
     
+    # Calculate the confusion matrix, accuracy, credibility and confidence 
+    #   of each training case   
+    for i in range(len(trainLabels)):
+        train_conf_matrix.append(getConfusionMatrix(testLabels[i], actualTest[i]))
+        train_credibility.append(getCredibility(actualTest[i]))
+        train_confidence.append(100*getAccuracy(conf_matrix[i])/credibility[i])
+
+    testing_data = [train_conf_matrix, train_credibility, train_confidence]
+
     # Calculate the confusion matrix, accuracy, credibility and confidence 
     #   of each testing case   
     for i in range(len(testLabels)):
-        conf_matrix.append(getConfusionMatrix(testLabels[i], actualTest[i]))
-        credibility.append(getCredibility(actualTest[i]))
-        print("credibility: ", credibility)
-        confidence.append(100*getAccuracy(conf_matrix[i])/credibility[i])
-        print("confidence: ", confidence)
+        test_conf_matrix.append(getConfusionMatrix(testLabels[i], actualTest[i]))
+        test_credibility.append(getCredibility(actualTest[i]))
+        test_confidence.append(100*getAccuracy(conf_matrix[i])/credibility[i])
+
+    training_data = [train_conf_matrix, train_credibility, train_confidence]
 
     if accuracy > k_best[1]:
         k_best = [k_round, actualTrain, trainLabels, actualTest, testLabels, conf_matrix, confidence, credibility]
@@ -588,8 +600,11 @@ credibility = k_best[7]
 
 print ("\nWriting Data for best fold k =", k_best[0], "...") 
 
+# write training data
+writeData("Training", "../output/TestOutput.csv", actualTest, testLabels, confusion, confidence, credibility)
+
 # write testing data
-writeData("../output/TestOutput.csv", actualTest, testLabels, confusion, confidence, credibility)
+writeData("Testing", "../output/TestOutput.csv", actualTest, testLabels, confusion, confidence, credibility)
 
 # plot violin plots
 violin(confidence, credibility)
