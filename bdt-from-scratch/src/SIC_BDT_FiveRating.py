@@ -47,7 +47,6 @@ def importData(test_name, train_name, calib_name):
     global header  
     global tst_data_array
     global trn_data_array
-#    global cal_data_array
     
     tst_f =  test_name # import file
     tst_df = pd.read_csv(tst_f, header = 0)
@@ -60,22 +59,12 @@ def importData(test_name, train_name, calib_name):
     trn_df = trn_df._get_numeric_data()
     trn_data_array = trn_df.as_matrix()
     
-#    cal_f =  calib_name # import file
-#    cal_df = pd.read_csv(cal_f, header = 0)
-#    header = list(cal_df.columns.values)[:-4]
-#    cal_df = cal_df._get_numeric_data()
-#    cal_data_array = cal_df.as_matrix()
-    
 # SET TRAINING DATA
 def setTrain(lst):
     global train_features
     global calib_features
-    #rand_trn = [ trn_data_array[i].tolist() for i in random.sample(xrange(len(trn_data_array)), len(trn_data_array)) ]
-    #np.random.shuffle(trn_data_array)
     split = int((6.0/7.0) * len(lst))
-    #print(split)
     train_features = lst[:split].tolist() # training data
-    #calib_features = [ train_features[i] for i in sorted(random.sample(xrange(len(train_features)), split)) ]
     calib_features = lst[split:].tolist() # calibration data
     
 # EXTRACT DATA
@@ -99,26 +88,8 @@ def getPigns(dataset, ratings):
                 pign.append(currentLabel.count(i))
         
         pign[:] = [float(x) / (ratings - zeroratings) for x in pign] 
-#        pign = five_to_two(pign)
         nodePigns.append(pign) # Add pign to list of pigns
     return nodePigns
-    
-def five_to_two(lst):
-    theta = lst[2]/2
-    pb = lst[0] + (lst[1] * 0.75) + theta + (lst[3] * 0.25)
-    pm = lst[4] + (lst[3] * 0.75) + theta + (lst[1] * 0.25)
-    return [pb,pm]
-    
-# SET TESTING DATA
-#def setTest():
-#    global test_malig    
-#    global test_features
-#    global tstm    
-#    test_malig = []
-#    #test_malig = tst_data_array[:,-1] # test malignancy
-#    test_features = tst_data_array[:] # test pixel area
-#    test_features = test_features.tolist()
-#    tstm = [int(x) for x in test_malig]
 
 # CALCULATE ENTROPY OF A NODE
 def calcEntrop(dataset,num_ratings):
@@ -549,8 +520,6 @@ def CosineSimilarity(actual, predicted):
     return (average/len(predicted), similarities, ratings)
 
 # Area Under ROC Curve for a single case
-# predicted = [0, .2, .4, .4, 0]
-# actual = [0, .25, .5, .25, 0]
 def getROC(predicted, actual):
     binaryActual = [0, 0,0,0,0]
     maxIndex = actual.index(max(actual))
@@ -605,7 +574,6 @@ def AUCdt(x, actual, predicted):
     # Sum all JD values <= x
     for i in range(0, len(predicted)):
         temp = JeffreyDistance2(np.asarray(actual[i]), np.asarray(predicted[i]))
-        #temp = EMD2(np.asarray(actual[i]), np.asarray(predicted[i]))
         if  temp <= x:
             AUCsum += temp
             counter += 1
@@ -640,7 +608,6 @@ def getMode(lst):
     result = []
     for i in range(len(lst[0])):
         x = [lst[k][i].index(max(lst[k][i]))+1 for k in range(len(lst))]
-#        x = [lst[0][i].index(max(lst[0][i])),lst[1][i].index(max(lst[1][i])),lst[2][i].index(max(lst[2][i]))]
         ones = x.count(1)
         twos = x.count(2)
         if (ones > twos):
@@ -703,11 +670,11 @@ def getTrees(np,nc,md):
             t.write(str(trees))
             t.close()
     return trees[1:]
+
 #####################################
 # MAIN SCRIPT
 #####################################
 f = open("../output/BDT Output.txt","w")
-#treeFile = open("output/trees.txt","w")
 importAllData("../data/modeBalanced/ModeBalanced_170_LIDC_809_Random.csv")
 #importIdData("./data/clean/LIDC_809_Complete.csv")
 #importData("./data/modeBalanced/small/Test_ModeBalanced_809.csv","./data/modeBalanced/small/Train_600_ModeBalanced_809_Random.csv","")
@@ -736,15 +703,13 @@ for trn_ind, tst_ind in kf:
     print("Train Size: ", len(train_features))
     print("Test Size: ", len(test_features))
     # Create Tree
-    print ("Building Belief Decision Tree...") 
-    
+    print ("Building Belief Decision Tree...")  
     
     print("CREATING BDT (d = ",maxdepth,", np = ",nparent,", nc = ",nchild,"): \n\n",file=f)
     # Create Tree
     trees = getTrees(nparent,nchild,maxdepth)
     #trees = buildTrees(nparent,nchild,maxdepth)
     #t.write(str(trees))   
-    #trees = [{'MeanIntensityBG': {268.7917: {'right': {'gaborSD_0_0': {1631.7: {'right': {'markov1': {492.4872: {'right': {'gabormean_1_2': {'BBA': [0.08333333333333333, 0.03787878787878788, 0.045454545454545456, 0.030303030303030304, 0.05303030303030303], 113.9333: {'right': {'gabormean_0_2': {4650.11: {'right': {'Leaf': {'BBA': [0.0, 0.0, 0.15, 0.0, 0.1]}}, 'left': {'Leaf': {'BBA': [0.019230769230769232, 0.09615384615384616, 0.0, 0.07692307692307693, 0.057692307692307696]}}}, 'BBA': [0.010869565217391304, 0.05434782608695652, 0.06521739130434782, 0.043478260869565216, 0.07608695652173914]}}, 'left': {'Leaf': {'BBA': [0.25, 0.0, 0.0, 0.0, 0.0]}}}}}, 'left': {'Leaf': {'BBA': [0.06593406593406594, 0.054945054945054944, 0.04395604395604396, 0.0521978021978022, 0.03296703296703297]}}}, 'BBA': [0.07056451612903226, 0.05040322580645161, 0.04435483870967742, 0.046370967741935484, 0.038306451612903226]}}, 'left': {'IntensityDifference': {319.2286: {'right': {'Leaf': {'BBA': [0.06111111111111111, 0.03611111111111111, 0.041666666666666664, 0.030555555555555555, 0.08055555555555556]}}, 'left': {'gaborSD_3_1': {79.8495: {'right': {'Leaf': {'BBA': [0.0, 0.0, 0.0, 0.0, 0.25]}}, 'left': {'gabormean_2_1': {56.4091: {'right': {'Leaf': {'BBA': [0.03125, 0.140625, 0.078125, 0.0, 0.0]}}, 'left': {'Leaf': {'BBA': [0.1, 0.0, 0.0, 0.15, 0.0]}}}, 'BBA': [0.057692307692307696, 0.08653846153846154, 0.04807692307692308, 0.057692307692307696, 0.0]}}}, 'BBA': [0.041666666666666664, 0.0625, 0.034722222222222224, 0.041666666666666664, 0.06944444444444445]}}}, 'BBA': [0.05555555555555555, 0.04365079365079365, 0.03968253968253968, 0.03373015873015873, 0.07738095238095238]}}}, 'BBA': [0.063, 0.047, 0.042, 0.04, 0.058]}}, 'left': {'Elongation': {1.242119927: {'right': {'SDIntensityBG': {723.0: {'right': {'Entropy': {158000.0: {'right': {'Leaf': {'BBA': [0.25, 0.0, 0.0, 0.0, 0.0]}}, 'left': {'MeanIntensity': {29.0: {'right': {'Leaf': {'BBA': [0.0, 0.11538461538461539, 0.0, 0.038461538461538464, 0.09615384615384616]}}, 'left': {'Leaf': {'BBA': [0.0, 0.025, 0.125, 0.1, 0.0]}}}, 'BBA': [0.0, 0.07608695652173914, 0.05434782608695652, 0.06521739130434782, 0.05434782608695652]}}}, 'BBA': [0.08571428571428572, 0.05, 0.03571428571428571, 0.04285714285714286, 0.03571428571428571]}}, 'left': {'Leaf': {'BBA': [0.06666666666666667, 0.05277777777777778, 0.044444444444444446, 0.05, 0.03611111111111111]}}}, 'BBA': [0.072, 0.052, 0.042, 0.048, 0.036]}}, 'left': {'Sumaverage': {-70300.0: {'right': {'Leaf': {'BBA': [0.07222222222222222, 0.03611111111111111, 0.04722222222222222, 0.03611111111111111, 0.058333333333333334]}}, 'left': {'gaborSD_1_2': {43.1866: {'right': {'RadialDistanceSD': {0.717647059: {'right': {'Leaf': {'BBA': [0.05357142857142857, 0.07142857142857142, 0.017857142857142856, 0.10714285714285714, 0.0]}}, 'left': {'Leaf': {'BBA': [0.15, 0.0, 0.1, 0.0, 0.0]}}}, 'BBA': [0.09375, 0.041666666666666664, 0.052083333333333336, 0.0625, 0.0]}}, 'left': {'Leaf': {'BBA': [0.0, 0.0, 0.0, 0.0, 0.25]}}}, 'BBA': [0.06428571428571428, 0.02857142857142857, 0.03571428571428571, 0.04285714285714286, 0.07857142857142857]}}}, 'BBA': [0.07, 0.034, 0.044, 0.038, 0.064]}}}, 'BBA': [0.071, 0.043, 0.043, 0.043, 0.05]}}}, 'BBA': [0.067, 0.045, 0.0425, 0.0415, 0.054]}}, {'SDIntensityBG': {272.2273: {'right': {'markov2': {231.4831: {'right': {'gaborSD_0_0': {2656.17: {'right': {'Leaf': {'BBA': [0.13202247191011235, 0.056179775280898875, 0.11235955056179775, 0.0702247191011236, 0.12921348314606743]}}, 'left': {'SDIntensity': {435.8908: {'right': {'Leaf': {'BBA': [0.45, 0.0, 0.05, 0.0, 0.0]}}, 'left': {'Area': {141.0: {'right': {'Leaf': {'BBA': [0.0, 0.039473684210526314, 0.15789473684210525, 0.07894736842105263, 0.2236842105263158]}}, 'left': {'Leaf': {'BBA': [0.075, 0.125, 0.225, 0.075, 0.0]}}}, 'BBA': [0.02586206896551724, 0.06896551724137931, 0.1810344827586207, 0.07758620689655173, 0.14655172413793102]}}}, 'BBA': [0.1346153846153846, 0.05128205128205128, 0.14743589743589744, 0.057692307692307696, 0.10897435897435898]}}}, 'BBA': [0.1328125, 0.0546875, 0.123046875, 0.06640625, 0.123046875]}}, 'left': {'markov1': {356.3077: {'right': {'Eccentricity': {1.208467243: {'right': {'Leaf': {'BBA': [0.0, 0.07352941176470588, 0.1323529411764706, 0.11764705882352941, 0.17647058823529413]}}, 'left': {'Leaf': {'BBA': [0.275, 0.075, 0.125, 0.025, 0.0]}}}, 'BBA': [0.10185185185185185, 0.07407407407407407, 0.12962962962962962, 0.08333333333333333, 0.1111111111111111]}}, 'left': {'Leaf': {'BBA': [0.11956521739130435, 0.06521739130434782, 0.10597826086956522, 0.09782608695652174, 0.11141304347826086]}}}, 'BBA': [0.11554621848739496, 0.06722689075630252, 0.11134453781512606, 0.09453781512605042, 0.11134453781512606]}}}, 'BBA': [0.12449392712550607, 0.06072874493927125, 0.11740890688259109, 0.07995951417004049, 0.11740890688259109]}}, 'left': {'IntensityDifference': {204.1443: {'right': {'MaxIntensityBG': {862.0: {'right': {'MeanIntensity': {'BBA': [0.1893939393939394, 0.07575757575757576, 0.08333333333333333, 0.06060606060606061, 0.09090909090909091], 1503.0: {'right': {'Leaf': {'BBA': [0.5, 0.0, 0.0, 0.0, 0.0]}}, 'left': {'gaborSD_3_1': {65.8242: {'right': {'Leaf': {'BBA': [0.125, 0.25, 0.075, 0.025, 0.025]}}, 'left': {'Leaf': {'BBA': [0.0, 0.0, 0.15384615384615385, 0.1346153846153846, 0.21153846153846154]}}}, 'BBA': [0.05434782608695652, 0.10869565217391304, 0.11956521739130435, 0.08695652173913043, 0.13043478260869565]}}}}}, 'left': {'Leaf': {'BBA': [0.16483516483516483, 0.07967032967032966, 0.07417582417582418, 0.06318681318681318, 0.11813186813186813]}}}, 'BBA': [0.17137096774193547, 0.07862903225806452, 0.07661290322580645, 0.0625, 0.11088709677419355]}}, 'left': {'gaborSD_0_0': {19430.96: {'right': {'gabormean_2_1': {47.1436: {'right': {'Perimeter': {164.0: {'right': {'Leaf': {'BBA': [0.0, 0.0, 0.1, 0.325, 0.075]}}, 'left': {'markov1': {379.2439: {'right': {'Leaf': {'BBA': [0.3181818181818182, 0.1590909090909091, 0.022727272727272728, 0.0, 0.0]}}, 'left': {'Leaf': {'BBA': [0.05, 0.125, 0.225, 0.1, 0.0]}}}, 'BBA': [0.19047619047619047, 0.14285714285714285, 0.11904761904761904, 0.047619047619047616, 0.0]}}}, 'BBA': [0.12903225806451613, 0.0967741935483871, 0.11290322580645161, 0.13709677419354838, 0.024193548387096774]}}, 'left': {'Leaf': {'BBA': [0.0, 0.0, 0.05, 0.025, 0.425]}}}, 'BBA': [0.0975609756097561, 0.07317073170731707, 0.0975609756097561, 0.10975609756097561, 0.12195121951219512]}}, 'left': {'Leaf': {'BBA': [0.13068181818181818, 0.07670454545454546, 0.1278409090909091, 0.07386363636363637, 0.09090909090909091]}}}, 'BBA': [0.12015503875968993, 0.0755813953488372, 0.1182170542635659, 0.08527131782945736, 0.10077519379844961]}}}, 'BBA': [0.14525691699604742, 0.07707509881422925, 0.09782608695652174, 0.0741106719367589, 0.10573122529644269]}}}, 'BBA': [0.135, 0.069, 0.1075, 0.077, 0.1115]}}, {'IntensityDifference': {267.0556: {'right': {'markov3': {231.4831: {'right': {'markov4': {371.6891: {'right': {'MinIntensityBG': {481.3424: {'right': {'Leaf': {'BBA': [0.6923076923076923, 0.0, 0.057692307692307696, 0.0, 0.0]}}, 'left': {'gabormean_2_2': {54.3519: {'right': {'Leaf': {'BBA': [0.1, 0.15, 0.475, 0.025, 0.0]}}, 'left': {'gaborSD_3_0': {'BBA': [0.0, 0.03260869565217391, 0.11956521739130435, 0.15217391304347827, 0.44565217391304346], 45.7335: {'right': {'Leaf': {'BBA': [0.0, 0.05, 0.05, 0.3, 0.35]}}, 'left': {'Leaf': {'BBA': [0.0, 0.019230769230769232, 0.17307692307692307, 0.038461538461538464, 0.5192307692307693]}}}}}}, 'BBA': [0.030303030303030304, 0.06818181818181818, 0.22727272727272727, 0.11363636363636363, 0.3106060606060606]}}}, 'BBA': [0.21739130434782608, 0.04891304347826087, 0.1793478260869565, 0.08152173913043478, 0.22282608695652173]}}, 'left': {'SDIntensity': {465.6472: {'right': {'gabormean_1_1': {1604.94: {'right': {'Leaf': {'BBA': [0.75, 0.0, 0.0, 0.0, 0.0]}}, 'left': {'Leaf': {'BBA': [0.6, 0.075, 0.075, 0.0, 0.0]}}}, 'BBA': [0.6818181818181818, 0.03409090909090909, 0.03409090909090909, 0.0, 0.0]}}, 'left': {'MinorAxisLength': {11.86005794: {'right': {'gaborSD_0_1': {5513.7: {'right': {'markov2': {320.1897: {'right': {'gaborSD_1_0': {'BBA': [0.0, 0.0, 0.05952380952380952, 0.13095238095238096, 0.5595238095238095], 367.347: {'right': {'Leaf': {'BBA': [0.0, 0.0, 0.09090909090909091, 0.22727272727272727, 0.4318181818181818]}}, 'left': {'Leaf': {'BBA': [0.0, 0.0, 0.025, 0.025, 0.7]}}}}}, 'left': {'Leaf': {'BBA': [0.0, 0.075, 0.175, 0.225, 0.275]}}}, 'BBA': [0.0, 0.024193548387096774, 0.0967741935483871, 0.16129032258064516, 0.46774193548387094]}}, 'left': {'Leaf': {'BBA': [0.025, 0.125, 0.2, 0.275, 0.125]}}}, 'BBA': [0.006097560975609756, 0.04878048780487805, 0.12195121951219512, 0.18902439024390244, 0.38414634146341464]}}, 'left': {'gabormean_3_1': {64.8078: {'right': {'Leaf': {'BBA': [0.0, 0.3, 0.375, 0.075, 0.0]}}, 'left': {'Leaf': {'BBA': [0.19230769230769232, 0.07692307692307693, 0.40384615384615385, 0.07692307692307693, 0.0]}}}, 'BBA': [0.10869565217391304, 0.17391304347826086, 0.391304347826087, 0.07608695652173914, 0.0]}}}, 'BBA': [0.04296875, 0.09375, 0.21875, 0.1484375, 0.24609375]}}}, 'BBA': [0.2063953488372093, 0.07848837209302326, 0.17151162790697674, 0.11046511627906977, 0.18313953488372092]}}}, 'BBA': [0.21022727272727273, 0.06818181818181818, 0.17424242424242425, 0.10037878787878787, 0.19696969696969696]}}, 'left': {'gabormean_0_2': {1976.31: {'right': {'gaborSD_2_1': {67.25: {'right': {'Leaf': {'BBA': [0.425, 0.2, 0.05, 0.075, 0.0]}}, 'left': {'gaborSD_3_2': {39.6716: {'right': {'Leaf': {'BBA': [0.075, 0.1, 0.35, 0.2, 0.025]}}, 'left': {'Leaf': {'BBA': [0.0, 0.045454545454545456, 0.13636363636363635, 0.11363636363636363, 0.45454545454545453]}}}, 'BBA': [0.03571428571428571, 0.07142857142857142, 0.23809523809523808, 0.15476190476190477, 0.25]}}}, 'BBA': [0.16129032258064516, 0.11290322580645161, 0.1774193548387097, 0.12903225806451613, 0.1693548387096774]}}, 'left': {'Leaf': {'BBA': [0.16758241758241757, 0.08241758241758242, 0.18681318681318682, 0.11263736263736264, 0.20054945054945056]}}}, 'BBA': [0.16598360655737704, 0.09016393442622951, 0.18442622950819673, 0.1168032786885246, 0.19262295081967212]}}}, 'BBA': [0.1889763779527559, 0.07874015748031496, 0.17913385826771652, 0.10826771653543307, 0.19488188976377951]}}, 'left': {'markov1': {203.2727: {'right': {'gabormean_0_2': {'BBA': [0.24152542372881355, 0.1016949152542373, 0.13771186440677965, 0.09322033898305085, 0.17584745762711865], 2008.36: {'right': {'SecondMoment': {1.671967224: {'right': {'Leaf': {'BBA': [0.0, 0.075, 0.025, 0.075, 0.575]}}, 'left': {'Leaf': {'BBA': [0.34375, 0.09375, 0.203125, 0.109375, 0.0]}}}, 'BBA': [0.21153846153846154, 0.08653846153846154, 0.1346153846153846, 0.09615384615384616, 0.22115384615384615]}}, 'left': {'Leaf': {'BBA': [0.25, 0.10597826086956522, 0.13858695652173914, 0.09239130434782608, 0.16304347826086957]}}}}}, 'left': {'gabormean_0_1': {19588.11: {'right': {'gabormean_2_0': {33.0867: {'right': {'MaxIntensityBG': {'BBA': [0.19827586206896552, 0.10344827586206896, 0.25862068965517243, 0.15517241379310345, 0.034482758620689655], 412.9867: {'right': {'Leaf': {'BBA': [0.475, 0.125, 0.15, 0.0, 0.0]}}, 'left': {'Leaf': {'BBA': [0.05263157894736842, 0.09210526315789473, 0.3157894736842105, 0.23684210526315788, 0.05263157894736842]}}}}}, 'left': {'Leaf': {'BBA': [0.0, 0.0, 0.075, 0.075, 0.6]}}}, 'BBA': [0.14743589743589744, 0.07692307692307693, 0.21153846153846154, 0.1346153846153846, 0.1794871794871795]}}, 'left': {'Leaf': {'BBA': [0.19662921348314608, 0.10112359550561797, 0.17415730337078653, 0.10393258426966293, 0.17415730337078653]}}}, 'BBA': [0.181640625, 0.09375, 0.185546875, 0.11328125, 0.17578125]}}}, 'BBA': [0.21036585365853658, 0.0975609756097561, 0.16260162601626016, 0.10365853658536585, 0.1758130081300813]}}}, 'BBA': [0.1995, 0.088, 0.171, 0.106, 0.1855]}}, {'markov1': {267.0556: {'right': {'gabormean_0_2': {1631.7: {'right': {'gabormean_1_0': {2199.9: {'right': {'MaxIntensity': {1412.0: {'right': {'Leaf': {'BBA': [0.875, 0.025, 0.025, 0.025, 0.05]}}, 'left': {'gabormean_2_0': {'BBA': [0.05172413793103448, 0.19827586206896552, 0.22413793103448276, 0.22413793103448276, 0.3017241379310345], 57.0641: {'right': {'Leaf': {'BBA': [0.1, 0.325, 0.275, 0.275, 0.025]}}, 'left': {'Leaf': {'BBA': [0.02631578947368421, 0.13157894736842105, 0.19736842105263158, 0.19736842105263158, 0.4473684210526316]}}}}}}, 'BBA': [0.26282051282051283, 0.15384615384615385, 0.17307692307692307, 0.17307692307692307, 0.23717948717948717]}}, 'left': {'SDIntensity': {444.6014: {'right': {'Solidity': {0.977777778: {'right': {'Leaf': {'BBA': [1.0, 0.0, 0.0, 0.0, 0.0]}}, 'left': {'Leaf': {'BBA': [0.9, 0.0, 0.075, 0.025, 0.0]}}}, 'BBA': [0.9545454545454546, 0.0, 0.03409090909090909, 0.011363636363636364, 0.0]}}, 'left': {'Contrast': {43.5545: {'right': {'MinorAxisLength': {9.194970613999999: {'right': {'markov4': {74.0: {'right': {'Leaf': {'BBA': [0.09375, 0.296875, 0.390625, 0.140625, 0.078125]}}, 'left': {'Leaf': {'BBA': [0.05, 0.1, 0.35, 0.45, 0.05]}}}, 'BBA': [0.07692307692307693, 0.22115384615384615, 0.375, 0.25961538461538464, 0.0673076923076923]}}, 'left': {'Leaf': {'BBA': [0.1, 0.525, 0.375, 0.0, 0.0]}}}, 'BBA': [0.08333333333333333, 0.3055555555555556, 0.375, 0.1875, 0.04861111111111111]}}, 'left': {'gabormean_1_2': {34.2439: {'right': {'MinorAxisLength': {39.54886118: {'right': {'Leaf': {'BBA': [0.0, 0.025, 0.0, 0.2, 0.775]}}, 'left': {'Leaf': {'BBA': [0.0, 0.022727272727272728, 0.22727272727272727, 0.38636363636363635, 0.36363636363636365]}}}, 'BBA': [0.0, 0.023809523809523808, 0.11904761904761904, 0.2976190476190476, 0.5595238095238095]}}, 'left': {'Leaf': {'BBA': [0.0, 0.025, 0.225, 0.0, 0.75]}}}, 'BBA': [0.0, 0.024193548387096774, 0.1532258064516129, 0.20161290322580644, 0.6209677419354839]}}}, 'BBA': [0.04477611940298507, 0.17537313432835822, 0.27238805970149255, 0.19402985074626866, 0.31343283582089554]}}}, 'BBA': [0.2696629213483146, 0.13202247191011235, 0.21348314606741572, 0.14887640449438203, 0.23595505617977527]}}}, 'BBA': [0.267578125, 0.138671875, 0.201171875, 0.15625, 0.236328125]}}, 'left': {'gaborSD_0_1': {756438.56: {'right': {'MeanIntensity': {1578.0: {'right': {'Leaf': {'BBA': [0.7692307692307693, 0.057692307692307696, 0.17307692307692307, 0.0, 0.0]}}, 'left': {'gabormean_2_2': {49.5579: {'right': {'Leaf': {'BBA': [0.0, 0.2, 0.425, 0.2, 0.175]}}, 'left': {'Leaf': {'BBA': [0.0, 0.057692307692307696, 0.17307692307692307, 0.19230769230769232, 0.5769230769230769]}}}, 'BBA': [0.0, 0.11956521739130435, 0.2826086956521739, 0.1956521739130435, 0.40217391304347827]}}}, 'BBA': [0.2777777777777778, 0.09722222222222222, 0.24305555555555555, 0.125, 0.2569444444444444]}}, 'left': {'Leaf': {'BBA': [0.23055555555555557, 0.14722222222222223, 0.26666666666666666, 0.14166666666666666, 0.21388888888888888]}}}, 'BBA': [0.24404761904761904, 0.13293650793650794, 0.25992063492063494, 0.13690476190476192, 0.2261904761904762]}}}, 'BBA': [0.2559055118110236, 0.13582677165354332, 0.23031496062992127, 0.1466535433070866, 0.2312992125984252]}}, 'left': {'markov2': {202.6316: {'right': {'MaxIntensityBG': {'BBA': [0.30952380952380953, 0.15476190476190477, 0.20436507936507936, 0.125, 0.20634920634920634], 847.0: {'right': {'MeanIntensity': {'BBA': [0.2847222222222222, 0.14583333333333334, 0.2013888888888889, 0.11805555555555555, 0.25], 1503.0: {'right': {'Leaf': {'BBA': [0.825, 0.0, 0.05, 0.05, 0.075]}}, 'left': {'Area': {'BBA': [0.07692307692307693, 0.20192307692307693, 0.25961538461538464, 0.14423076923076922, 0.3173076923076923], 151.0: {'right': {'Leaf': {'BBA': [0.0, 0.078125, 0.1875, 0.234375, 0.5]}}, 'left': {'Leaf': {'BBA': [0.2, 0.4, 0.375, 0.0, 0.025]}}}}}}}}, 'left': {'MaxIntensity': {1437.0: {'right': {'Elongation': {1.1764839790000001: {'right': {'Leaf': {'BBA': [1.0, 0.0, 0.0, 0.0, 0.0]}}, 'left': {'Leaf': {'BBA': [0.95, 0.0, 0.05, 0.0, 0.0]}}}, 'BBA': [0.98, 0.0, 0.02, 0.0, 0.0]}}, 'left': {'gabormean_3_1': {42.102: {'right': {'gaborSD_3_1': {62.2908: {'right': {'Leaf': {'BBA': [0.325, 0.35, 0.325, 0.0, 0.0]}}, 'left': {'ConvexPerimeter': {49.20108142: {'right': {'Leaf': {'BBA': [0.0, 0.2, 0.225, 0.45, 0.125]}}, 'left': {'gaborSD_2_2': {54.8611: {'right': {'Leaf': {'BBA': [0.038461538461538464, 0.5192307692307693, 0.28846153846153844, 0.15384615384615385, 0.0]}}, 'left': {'Leaf': {'BBA': [0.05, 0.2, 0.575, 0.15, 0.025]}}}, 'BBA': [0.043478260869565216, 0.3804347826086957, 0.41304347826086957, 0.15217391304347827, 0.010869565217391304]}}}, 'BBA': [0.030303030303030304, 0.32575757575757575, 0.3560606060606061, 0.24242424242424243, 0.045454545454545456]}}}, 'BBA': [0.09883720930232558, 0.3313953488372093, 0.3488372093023256, 0.18604651162790697, 0.03488372093023256]}}, 'left': {'RadialDistanceSD': {3.22410917: {'right': {'Leaf': {'BBA': [0.0, 0.0, 0.0, 0.35, 0.65]}}, 'left': {'Leaf': {'BBA': [0.0, 0.0, 0.25, 0.0, 0.75]}}}, 'BBA': [0.0, 0.0, 0.13636363636363635, 0.1590909090909091, 0.7045454545454546]}}}, 'BBA': [0.06538461538461539, 0.21923076923076923, 0.27692307692307694, 0.17692307692307693, 0.26153846153846155]}}}, 'BBA': [0.3194444444444444, 0.15833333333333333, 0.20555555555555555, 0.12777777777777777, 0.18888888888888888]}}}}}, 'left': {'gabormean_1_2': {67.4787: {'right': {'Leaf': {'BBA': [0.25824175824175827, 0.1620879120879121, 0.21978021978021978, 0.15934065934065933, 0.20054945054945056]}}, 'left': {'Clustertendency': {0.027999999999999997: {'right': {'Leaf': {'BBA': [0.013888888888888888, 0.20833333333333334, 0.2916666666666667, 0.2638888888888889, 0.2222222222222222]}}, 'left': {'Leaf': {'BBA': [0.6363636363636364, 0.11363636363636363, 0.25, 0.0, 0.0]}}}, 'BBA': [0.25, 0.1724137931034483, 0.27586206896551724, 0.16379310344827586, 0.13793103448275862]}}}, 'BBA': [0.25625, 0.16458333333333333, 0.23333333333333334, 0.16041666666666668, 0.18541666666666667]}}}, 'BBA': [0.28353658536585363, 0.15955284552845528, 0.2184959349593496, 0.14227642276422764, 0.19613821138211382]}}}, 'BBA': [0.2695, 0.1475, 0.2245, 0.1445, 0.214]}}]
     ## Get actual data
     actualTrain = getPigns(train_features,4)
     actualTest = getPigns(test_features,4)
@@ -773,7 +738,6 @@ for trn_ind, tst_ind in kf:
     modified_con_test = getConfidentBBA(test_label_dict,calib_conf)
     
     selective_max = getMaxy([modified_avg_test, modified_max_test, modified_con_test])
-#    selective_modal = getMode([modified_avg_test, modified_max_test, modified_con_test])
     selective_avg = getAvy([modified_avg_test, modified_max_test, modified_con_test])
     actual_one = getPigns(test_features,1)
     actual_two = getPigns(test_features,2)
@@ -799,52 +763,7 @@ for trn_ind, tst_ind in kf:
     print(modal_avg_matrix,file=f)
     print("\nTESTING ACCURACY = ", test_accy, file=f)
     
-#    modal_matrix = confusion_matrix(selective_modal,tst_proba)
-#    test_accy = getAccuracy(modal_matrix, len(actualTest))
-#    
-#    print("\nTESTING CONFUSION MATRIX SELECTIVE MODAL BBA", file=f)
-#    print(modal_matrix,file=f)
-#    print("\nTESTING ACCURACY = ", test_accy, file=f)
-    #print (trees)
-    #print("BDT TREE: ",file =f)
-    #print(tree, file = f)
-    ##createPlot(tree)
-    #
-    
-        
-    #for i in range(1,5):
-    #    out.append(calcEntrop(train_features,i))
-    #    out2.append(calcEntrop(test_features,i))
-    #actualTrain = []
-    #actualTest = []
-    #for i in range(4):
-    #    actualTrain.append(out[i][2])
-    #    actualTest.append(out2[i][2])
-    #    
-    ## Classify training set
-    #for i in range(0,len(train_features)):
-    #    trainLabels.append(classify(tree, test_header,train_features[i]))
-     #Get training accuracy
-        
-    #training_matricies = []
-    
-    #print(modified_train)   
-    #print(len(modified_train))     
-        #training_matricies.append(getConfusionMatrix(trainLabels,))
-    #    
-    #print (training_matricies)
-    #train_class_matrix = getConfusionMatrix(modified_avg_train, actualTrain)
-    #train_accy = getAccuracy(train_class_matrix, len(trainLabels))
-    #print("\nTRAINING CONFUSION MATRIX",file=f)
-    #print(train_class_matrix,file=f)
-    #print("\n AVG BBA TRAINING ACCURACY = ", train_accy, file=f)
-    #
-    #train_class_matrix = getConfusionMatrix(modified_max_train, actualTrain)
-    #train_accy = getAccuracy(train_class_matrix, len(trainLabels))
-    #print("\nTRAINING CONFUSION MATRIX",file=f)
-    #print(train_class_matrix,file=f)
-    #print("\n MAX BBA TRAINING ACCURACY = ", train_accy, file=f)
-    
+
     ## Classify testing set
     #for i in range(0,len(test_features)):
     #    testLabels.append(classify(tree, test_header,test_features[i]))
@@ -913,7 +832,6 @@ for trn_ind, tst_ind in kf:
     for i, val in enumerate(p_vals):
         m = val.index(max(val))
         sec = max([x for k,x in enumerate(val) if k != m])
-    #    print(i, "  P-values: ", val, "  Class Label: ", val.index(max(val))+1, "  Confidence: ", 1-sec, "\tCredibility: ", max(val))
         confidence.append(1 - sec)
         credibility.append(max(val))
         
@@ -923,55 +841,3 @@ for trn_ind, tst_ind in kf:
     writeData("Training", trainhead, "../output/TrainOutput.csv", "wb", actualTrain, trnLabels, confidence, credibility, 0)
     writeData("Testing", testhead, "../output/TestOutput1.csv", "wb", actualTest, selective_avg , confidence, credibility, len(trnLabels))
 f.close()
-#
-## Output training data to csv
-#with open("output/TrainOutput.csv", "wb") as csvfile:
-#    writer = csv.writer(csvfile, delimiter=',',
-#                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
-#    writer.writerow(['Actual Training [1]', 'Actual Training [2]', 'Actual Training [3]', 'Actual Training [4]', 'Actual Training [5]', 'Training [1]' , 'Training [2]', 'Training [3]', 'Training [4]', 'Training [5]', 'RMSE', 'Pearson r'])
-#    for i in range(0, len(trainLabels)):
-#        # Calculate RMSE
-#        rmse = 0
-#        for j in range (0,5):
-#            rmse += pow((actualTrain[i][j] - trainLabels[i][j]),2)
-#        rmse /= 5
-#        rmse = math.sqrt(rmse)
-#        
-#        # Calculate Pearson correlation coefficient (r)
-#        r = 0
-#        xySum = 0
-#        xSum = 0
-#        ySum = 0
-#        for j in range (0,5):        
-#            xySum += (actualTrain[i][j] - sum(actualTrain[i])/5) * (trainLabels[i][j] - sum(trainLabels[i])/5)
-#            xSum += pow((actualTrain[i][j] - sum(actualTrain[i])/5),2)
-#            ySum += pow((trainLabels[i][j] - sum(trainLabels[i])/5),2)
-#        r = xySum / (math.sqrt(xSum) * math.sqrt(ySum))
-#        
-#        writer.writerow([actualTrain[i][0], actualTrain[i][1], actualTrain[i][2], actualTrain[i][3], actualTrain[i][4], trainLabels[i][0], trainLabels[i][1], trainLabels[i][2], trainLabels[i][3], trainLabels[i][4], rmse, r])
-#
-## Output training data to csv
-#with open("output/TestOutput.csv", "wb") as csvfile:
-#    writer = csv.writer(csvfile, delimiter=',',
-#                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
-#    writer.writerow(['Actual Testing [1]', 'Actual Testing [2]', 'Actual Testing [3]', 'Actual Testing [4]', 'Actual Testing [5]', 'Testing [1]', 'Testing [2]', 'Testing [3]', 'Testing [4]', 'Testing [5]', 'RMSE', 'Pearson r'])    
-#    for i in range(0, len(testLabels)):
-#        # Calculate RMSE        
-#        rmse = 0
-#        for j in range (0,5):
-#            rmse += pow((actualTest[i][j] - testLabels[i][j]),2)
-#        rmse /= 5
-#        rmse = math.sqrt(rmse)
-#
-#        # Calculate Pearson correlation coefficient (r)
-#        r = 0
-#        xySum = 0
-#        xSum = 0
-#        ySum = 0
-#        for j in range (0,5):        
-#            xySum += (actualTest[i][j] - sum(actualTest[i])/5) * (testLabels[i][j] - sum(testLabels[i])/5)
-#            xSum += pow((actualTest[i][j] - sum(actualTest[i])/5),2)
-#            ySum += pow((testLabels[i][j] - sum(testLabels[i])/5),2)
-#        r = xySum / (math.sqrt(xSum) * math.sqrt(ySum))        
-#        
-#        writer.writerow([actualTest[i][0], actualTest[i][1], actualTest[i][2], actualTest[i][3], actualTest[i][4], testLabels[i][0], testLabels[i][1], testLabels[i][2], testLabels[i][3], testLabels[i][4], rmse, r])

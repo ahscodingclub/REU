@@ -66,7 +66,7 @@ def importAllData(set_name):
 ## SET TRAINING DATA 
 def setTrain(trn_data_array):
     global train_features
-    train_features = trn_data_array.tolist() # training data
+    train_features = trn_data_array[:].tolist() # training data
     
 # EXTRACT DATA
 def getPigns(dataset):
@@ -300,14 +300,9 @@ def classify(inputTree, featLabels, testVec):
 #####################################
 
 # calculate a confusion matrix given predicted and actual, using full complexity of BBA
+# returns one confusion matrix 
 def getConfusionMatrix(predicted,actual):
-    conf_mat = [[0,0,0,0,0],
-                [0,0,0,0,0],
-                [0,0,0,0,0],
-                [0,0,0,0,0],
-                [0,0,0,0,0]]
-
-    return np.add(conf_mat, cross_product(predicted,actual))
+  return cross_product(predicted,actual)
 
 def cross_product(X,Y):
     product = [ [ 0 for y in range(len(Y)) ] for x in range(len(X)) ]
@@ -319,7 +314,8 @@ def cross_product(X,Y):
     return product
 
 # Calculate accuracy given a confusion matrix
-def getAccuracy(class_matrix): # returns accuracy of misclassification matrix 
+# returns accuracy of misclassification matrix 
+def getAccuracy(class_matrix): 
     accy = 0.0
     for j in range(0,5):
         accy += class_matrix[j][j]
@@ -358,18 +354,63 @@ def JeffreyDistance(v1,v2):
 #####################################
 # OUTPUT RESULTS DATAFILES
 #####################################
-def writeData(filename, actual, predicted, confusion, confidence, credibility):
+def writeData(train_or_test, filename, actual, predicted, confusion, credibility, confidence, id_start):
+    
+    with open(filename, 'wb') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',',
+                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        if train_or_test == "Training":
+            writer.writerow(['Nodule ID',\
+                             'Actual [1]',      'Actual [2]',       'Actual [3]',       'Actual [4]',       'Actual [5]',\
+                             'Predicted [1]' ,  'Predicted [2]',    'Predicted [3]',    'Predicted [4]',    'Predicted [5]',\
+                              header])
+        else:
+            writer.writerow(['Nodule ID',\
+                             'Actual [1]',      'Actual [2]',       'Actual [3]',       'Actual [4]',       'Actual [5]',\
+                             'Predicted [1]' ,  'Predicted [2]',    'Predicted [3]',    'Predicted [4]',    'Predicted [5]',\
+                             'Confidence', 'Credibility', header])
 
-    print("\nTesting \n")
+        
+        for i in range(0, len(predicted)):
+            # Write data and similarity measures to file
+            if train_or_test == "Training":
+                writer.writerow([set_data_array[i+id_start][2],\
+                                 actual[i][0], actual[i][1], actual[i][2], actual[i][3], actual[i][4],\
+                                 predicted[i][0], predicted[i][1], predicted[i][2], predicted[i][3], predicted[i][4],\
+                                ])
+            else:
+                writer.writerow([set_data_array[i+id_start][2],\
+                                 actual[i][0], actual[i][1], actual[i][2], actual[i][3], actual[i][4],\
+                                 predicted[i][0], predicted[i][1], predicted[i][2], predicted[i][3], predicted[i][4],\
+                                 confidence[i], credibility[i],])
+    # Computing aggregate confidence and credibility
+    agg_conf_matrix = np.multiply(0, copy.deepcopy(confusion[0]))
+    agg_confidence = 0
+    agg_credibility = 0
+
+    print(train_or_test, file=f)
     for i in range(0,len(confusion)):
-        print("\n\n")
-        #final_confusion = np.add(final_confusion, confusion[i])
-        print("acutal: ", actual[i])
-        print("predicted: ", predicted[i])
+        print("\n\n", file=f)
+        agg_conf_matrix = np.add(agg_conf_matrix, confusion[i])
+        print("acutal: ", actual[i], file=f)
+        print("predicted: ", predicted[i], file=f)
         for row in confusion[i]:
-            print(["{0:5.5}".format(str(val)) for val in row])
-        print("Confidence = ", '{:.4}'.format(confidence[i]))
-        print("Credibility = ", '{:.4}'.format(credibility[i]))
+            print(["{0:5.5}".format(str(val)) for val in row], file=f)
+        agg_credibility += credibility[i]
+        print("Confidence = ", '{:.4}'.format(confidence[i]), file=f)
+        print("Credibility = ", '{:.4}'.format(credibility[i]), file=f)
+    
+    agg_credibility = agg_credibility/len(credibility)
+    agg_confidence = 100*getAccuracy(agg_conf_matrix)/agg_credibility
+
+    print("\n\nAggregate Results: ", file=f)
+    for row in agg_conf_matrix:
+            print(["{0:5.5}".format(str(val)) for val in row], file=f)
+
+    print("Credibility = ", '{:.4}'.format(agg_credibility), file=f)       
+ 
+    print("Confidence = ", '{:.4}'.format(agg_confidence), file=f)
+
          
 #####################################
 # DRAW THE DECISION TREE
@@ -429,8 +470,7 @@ def visit(node, parent=None):
 def plotVio(old, category, a, axes, xlabel, ylabel):
     new = []
     labels = []
-    
-    # Get labels from category
+
     for cat in category:
         if (cat not in labels):
             new.append([])
@@ -456,17 +496,16 @@ def plotVio(old, category, a, axes, xlabel, ylabel):
     axes[a].set_ylabel(ylabel)
 
 # DRAW VIOLIN PLOTS FOR CONFIDENCE / CREDIBILITY
-def violin(confidence, credibility):
-    category = [1,2,3,4,5]
+def violin(credibility, confidence, category):
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
 
     # Confidence
     plotVio(confidence, category, 0, axes,  'Classification', 'Confidence')
-    axes[0].set_title('Confidence Values at Each ' + xlabel)
+    axes[0].set_title('Confidence Values at Each Class')
     
     # Credibility
     plotVio(credibility, category, 1, axes, 'Classification', 'Credibility')
-    axes[1].set_title('Credibilty Values at Each ' + xlabel)
+    axes[1].set_title('Credibilty Values at Each Class')
     
     # Save figure
     figure_dest = f_name[0:-4]+'.png'
@@ -549,12 +588,21 @@ for trn_ind, tst_ind in kf:
     print ("Classifying Training Set...") 
     for i in range(0,len(train_features)):
             trainLabels.append(classify(tree, test_header,train_features[i]))
-    
-    # Classify testing set
+
+   # Classify testing set
     print ("Classifying Testing Set...") 
     for i in range(0,len(test_features)):
             testLabels.append(classify(tree, test_header,test_features[i]))
-      
+
+
+    classes = [testlabel.index(max(testlabel))+1 for testlabel in testLabels] 
+
+    for i in range(0,len(classes)):
+      print("label: ", testLabels[i], file=f)
+      print("actual class: ", actualTest[i], file=f)
+      print("predicted class: ", classes[i], file=f)
+      print("\n\n", file=f)
+
     # Save training metrics
     train_conf_matrix = []
     train_credibility = []
@@ -568,46 +616,49 @@ for trn_ind, tst_ind in kf:
     # Calculate the confusion matrix, accuracy, credibility and confidence 
     #   of each training case   
     for i in range(len(trainLabels)):
-        train_conf_matrix.append(getConfusionMatrix(testLabels[i], actualTest[i]))
-        train_credibility.append(getCredibility(actualTest[i]))
-        train_confidence.append(100*getAccuracy(conf_matrix[i])/credibility[i])
+        train_conf_matrix.append(getConfusionMatrix(trainLabels[i], actualTrain[i]))
+        train_credibility.append(getCredibility(actualTrain[i]))
+        train_confidence.append(100*getAccuracy(train_conf_matrix[i])/train_credibility[i])
 
-    testing_data = [train_conf_matrix, train_credibility, train_confidence]
+    training_data = [train_conf_matrix, train_credibility, train_confidence, classes]
 
     # Calculate the confusion matrix, accuracy, credibility and confidence 
     #   of each testing case   
     for i in range(len(testLabels)):
         test_conf_matrix.append(getConfusionMatrix(testLabels[i], actualTest[i]))
         test_credibility.append(getCredibility(actualTest[i]))
-        test_confidence.append(100*getAccuracy(conf_matrix[i])/credibility[i])
+        test_confidence.append(100*getAccuracy(test_conf_matrix[i])/test_credibility[i])
 
-    training_data = [train_conf_matrix, train_credibility, train_confidence]
+    testing_data = [test_conf_matrix, test_credibility, test_confidence, classes]
 
+    accuracy = np.sum(test_confidence)/len(test_confidence)
+    
+    print("accuracy: ", accuracy, " for fold ", k_round)
+   
     if accuracy > k_best[1]:
-        k_best = [k_round, actualTrain, trainLabels, actualTest, testLabels, conf_matrix, confidence, credibility]
+        k_best = [k_round, accuracy, actualTrain, trainLabels, actualTest, testLabels, training_data, testing_data]
 
     # increase round of k-fold vlaidation
     k_round += 1
 
 # Output data to csv and text files
-actualTrain = k_best[1]
-trainLabels = k_best[2]
-actualTest = k_best[3]
-testLabels = k_best[4]
-confusion = k_best[5]
-confidence = k_best[6]
-credibility = k_best[7]
+actualTrain = k_best[2]
+trainLabels = k_best[3]
+actualTest = k_best[4]
+testLabels = k_best[5]
+training_data = k_best[6]
+testing_data = k_best[7]
 
-print ("\nWriting Data for best fold k =", k_best[0], "...") 
+print ("\nWriting Data for best fold k =", k_best[0], "...\n") 
 
 # write training data
-writeData("Training", "../output/TestOutput.csv", actualTest, testLabels, confusion, confidence, credibility)
+writeData("Training", "../output/NewTrainOutput.csv", actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0)
 
 # write testing data
-writeData("Testing", "../output/TestOutput.csv", actualTest, testLabels, confusion, confidence, credibility)
+writeData("Testing", "../output/NewTestOutput.csv", actualTest, testLabels, testing_data[0], testing_data[1], testing_data[2], len(trainLabels))
 
 # plot violin plots
-violin(confidence, credibility)
+violin(testing_data[1],testing_data[2], testing_data[3])
     
 # Close output file
 f.close()

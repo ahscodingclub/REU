@@ -65,12 +65,13 @@ def importAllData(set_name):
 ## SET TRAINING DATA 
 def setTrain(trn_data_array):
     global train_features
-    global train_features
     global calib_features
 
     split = int((6.0/7.0) * len(trn_data_array))
     train_features = trn_data_array[:split].tolist() # training data
     calib_features = trn_data_array[split:].tolist() # calibration data
+    print("train_features: ", train_features)
+    print("length: ", len(train_features))
     
 # EXTRACT DATA
 def getPigns(dataset):
@@ -353,8 +354,8 @@ def PValue(test, calib):
 #####################################
 
 # calculate a confusion matrix given predicted and actual, using full complexity of BBA
+# returns an array of confusion matrices
 def getConfusionMatrix(predicted,actual):
-    print("actual: ", actual)
     conf_mat = [[0,0,0,0,0],
                 [0,0,0,0,0],
                 [0,0,0,0,0],
@@ -521,12 +522,13 @@ def plotVio(old, category, a, axes, xlabel, ylabel):
         if (cat not in labels):
             new.append([])
             labels.append(cat)
-    labels = sorted(labels)
+    labels = sorted(labels) 
     
     # Sort category values into new by label
     for x in range (len(old)):
         new[labels.index(category[x])].append(old[x])
         
+    print("new: ", new)
     # Plot the information
     nans = np.array([float('nan'), float('nan')])
     try:  
@@ -593,11 +595,8 @@ elif(var_set == "y"):
 test_header = copy.copy(header)
 
 ###### K-FOLD VALIDATION ######
-if kfolds > 1:
-    kf = KFold(len(LIDC_Data), kfolds)
-else:
-    kf = LIDC_Data
-    
+kf = KFold(len(LIDC_Data), kfolds)
+
 k_round = 1
 k_best = [0,0.0,[],[],[],[],[],[]]
 trainhead = "Training Data: (d = " + str(maxdepth) + " | np = " + str(nparent) + " | nc = " + str(nchild) + " | k = " + str(kfolds) + ")"
@@ -618,7 +617,7 @@ for trn_ind, tst_ind in kf:
     print("Train Size: ", len(train_features))
     print("Calibration Size: ", len(calib_features))
     print("Test Size: ", len(test_features))
-    print ("Building Belief Decision Tree...") 
+    print ("Building Belief Decision Tree. ..") 
     
     # Create Tree
     # setting "switch = True" will make new tree each time
