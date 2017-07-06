@@ -511,16 +511,15 @@ def visit(node, parent=None):
             draw(k, k+'_'+v)
 
 # PLOT EACH VIOLIN PLOT
-def plotVio(old, category, a, axes, xlabel, ylabel):
+def plotVio(old, category, a, axes, xlabel, ylabel, title):
     new = []
     labels = []
-    
-    # Get labels from category
+
     for cat in category:
         if (cat not in labels):
             new.append([])
             labels.append(cat)
-    labels = sorted(labels) 
+    labels = sorted(labels)
     
     # Sort category values into new by label
     for x in range (len(old)):
@@ -534,31 +533,44 @@ def plotVio(old, category, a, axes, xlabel, ylabel):
         print (e)
         pass
     
+    axes[a].set_title(title)
     axes[a].yaxis.grid(True)
-    axes[a].set_xticks([y+1 for y in range(0,len(new))])
-    axes[a].set_xticklabels(labels)    
+    if(title[:9] != "Aggregate"):
+        axes[a].set_xticks([y+1 for y in range(0,len(new))])
+        axes[a].set_xticklabels(labels)    
+    else: 
+        axes[a].tick_params(axis='x',which='both',bottom='off',top='off',labelbottom='off') 
     axes[a].set_xlabel(xlabel)
     axes[a].set_ylabel(ylabel)
     axes[a].set_ylim([0,102])
-    #return v
 
 # DRAW VIOLIN PLOTS FOR CONFIDENCE / CREDIBILITY
-def violin(conf, cred, category, xlabel, show):
+def violin(credibility, confidence, category):
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
+
     # Confidence
-    plotVio(conf, category, 0, axes,  xlabel, 'Confidence')
-    axes[0].set_title('Confidence Values at Each ' + xlabel)
+    plotVio(confidence, category, 0, axes,  'Classification of Malignancy', 'Confidence', 'Confidence Values at Each Classification')
     
     # Credibility
-    plotVio(cred, category, 1, axes,  xlabel, 'Credibility')
-    axes[1].set_title('Credibilty Values at Each ' + xlabel)
+    plotVio(credibility, category, 1, axes, 'Classification of Malignancy', 'Credibility', 'Credibilty Values at Each Classification')
     
-    # Show & save figure
-    figure_dest = f_name[0:-4]+'.png'
+    # Save figure
+    figure_dest = f_name[0:-4] + '_classes.png'
     plt.savefig(figure_dest, bbox_inches='tight')
     print("Figure saved in ", figure_dest)
-    if show == 'show' and show != 'hide':
-        plt.show()
+
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
+
+    # Confidence
+    plotVio(confidence, [1]*len(category), 0, axes,  'Density of Values', 'Confidence', 'Aggregate Confidence Values of Classifications')
+    
+    # Credibility
+    plotVio(credibility, [1]*len(category), 1, axes, 'Density of Values', 'Credibility', 'Aggregate Credibility Values of Classifications')
+    # Save figure
+
+    figure_dest = f_name[0:-4]+'_aggregate.png'
+    plt.savefig(figure_dest, bbox_inches='tight')
+    print("Figure saved in ", figure_dest)
     
 #####################################
 # MAIN SCRIPT: Build, Classify, Output
@@ -694,7 +706,7 @@ writeData("Training", trainhead, f_name[0:-4] + '_training' + '.csv', "wb", actu
 writeData("Testing", testhead, f_name[0:-4] + '_testing' + '.csv', "wb", actualTest, testLabels, confidence, credibility, classes, accuracy, p_vals, len(trainLabels))
 
 
-violin([100*x for x in confidence], [100*x for x in credibility], classes, 'Classification', 'hide')
+violin([100*x for x in confidence], [100*x for x in credibility], classes)
     
 # Close output file
 f.close()

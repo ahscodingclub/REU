@@ -375,7 +375,7 @@ def JeffreyDistance(v1,v2):
 #####################################
 # OUTPUT RESULTS DATAFILES
 #####################################
-def writeData(train_or_test, filename, actual, predicted, confusion, credibility, confidence, id_start):
+def writeData(train_or_test, filename, actual, predicted, confusion, credibility, confidence, id_start,training):
     
     with open(filename, 'wb') as csvfile:
         writer = csv.writer(csvfile, delimiter=',',
@@ -404,22 +404,17 @@ def writeData(train_or_test, filename, actual, predicted, confusion, credibility
                                  actual[i][0], actual[i][1], actual[i][2], actual[i][3], actual[i][4],\
                                  predicted[i][0], predicted[i][1], predicted[i][2], predicted[i][3], predicted[i][4],\
                                  confidence[i], credibility[i],])
+    if(training):
+      return 
     # Computing aggregate confidence and credibility
     agg_conf_matrix = np.multiply(0, copy.deepcopy(confusion[0]))
     agg_confidence = 0
     agg_credibility = 0
 
-    print(train_or_test, file=f)
+    print("\n\n" + train_or_test, file=f)
     for i in range(0,len(confusion)):
-        print("\n\n", file=f)
         agg_conf_matrix = np.add(agg_conf_matrix, confusion[i])
-        print("acutal: ", actual[i], file=f)
-        print("predicted: ", predicted[i], file=f)
-        for row in confusion[i]:
-            print(["{0:5.5}".format(str(val)) for val in row], file=f)
         agg_credibility += credibility[i]
-        print("Confidence = ", '{:.4}'.format(float(confidence[i])), file=f)
-        print("Credibility = ", '{:.4}'.format(float(credibility[i])), file=f)
     
     agg_credibility = agg_credibility/len(credibility)
     agg_confidence = 100*getAccuracy(agg_conf_matrix)/agg_credibility
@@ -635,12 +630,6 @@ for trn_ind, tst_ind in kf:
 
     classes = [testlabel.index(max(testlabel))+1 for testlabel in testLabels] 
 
-    for i in range(0,len(classes)):
-      print("label: ", testLabels[i], file=f)
-      print("actual class: ", actualTest[i], file=f)
-      print("predicted class: ", classes[i], file=f)
-      print("\n\n", file=f)
-
     # Save training metrics
     train_conf_matrix = []
     train_credibility = []
@@ -660,7 +649,7 @@ for trn_ind, tst_ind in kf:
 
     training_data = [train_conf_matrix, train_credibility, train_confidence, classes]
   
-    writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0)
+    writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0, True)
     
     ## P->A Heuristic (predicted to actual mapping for testing set)
     pa_heur_act_test = getPAActual(testLabels)
@@ -695,10 +684,10 @@ testing_data = k_best[7]
 print ("\nWriting Data for best fold k =", k_best[0], "...\n") 
 
 # write training data
-writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0)
+writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0, False)
 
 # write testing data
-writeData("Testing", f_name[0:-4] + '_testing' + '.csv', actualTest, testLabels, testing_data[0], testing_data[1], testing_data[2], len(trainLabels))
+writeData("Testing", f_name[0:-4] + '_testing' + '.csv', actualTest, testLabels, testing_data[0], testing_data[1], testing_data[2], len(trainLabels), False)
 
 # plot violin plots
 violin(testing_data[1],testing_data[2], testing_data[3])
