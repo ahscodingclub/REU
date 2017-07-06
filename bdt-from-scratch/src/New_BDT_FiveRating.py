@@ -488,7 +488,7 @@ def visit(node, parent=None):
             draw(k, k+'_'+v)
 
 # PLOT EACH VIOLIN PLOT
-def plotVio(old, category, a, axes, xlabel, ylabel):
+def plotVio(old, category, a, axes, xlabel, ylabel, title):
     new = []
     labels = []
 
@@ -510,29 +510,45 @@ def plotVio(old, category, a, axes, xlabel, ylabel):
         print (e)
         pass
     
+    axes[a].set_title(title)
     axes[a].yaxis.grid(True)
-    axes[a].set_xticks([y+1 for y in range(0,len(new))])
-    axes[a].set_xticklabels(labels)    
+    if(title[:9] != "Aggregate"):
+        axes[a].set_xticks([y+1 for y in range(0,len(new))])
+        axes[a].set_xticklabels(labels)    
+    else: 
+        axes[a].tick_params(axis='x',which='both',bottom='off',top='off',labelbottom='off') 
     axes[a].set_xlabel(xlabel)
     axes[a].set_ylabel(ylabel)
-    axes[a].set_ylim([0,100])
+    axes[a].set_ylim([0,102])
 
 # DRAW VIOLIN PLOTS FOR CONFIDENCE / CREDIBILITY
 def violin(credibility, confidence, category):
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
 
     # Confidence
-    plotVio(confidence, category, 0, axes,  'Classification', 'Confidence')
-    axes[0].set_title('Confidence Values at Each Class')
+    plotVio(confidence, category, 0, axes,  'Classification of Malignancy', 'Confidence', 'Confidence Values at Each Classification')
     
     # Credibility
-    plotVio(credibility, category, 1, axes, 'Classification', 'Credibility')
-    axes[1].set_title('Credibilty Values at Each Class')
+    plotVio(credibility, category, 1, axes, 'Classification of Malignancy', 'Credibility', 'Credibilty Values at Each Classification')
     
     # Save figure
-    figure_dest = f_name[0:-4]+'.png'
+    figure_dest = f_name[0:-4] + '_classes.png'
     plt.savefig(figure_dest, bbox_inches='tight')
     print("Figure saved in ", figure_dest)
+
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
+
+    # Confidence
+    plotVio(confidence, [1]*len(category), 0, axes,  'Density of Values', 'Confidence', 'Aggregate Confidence Values of Classifications')
+    
+    # Credibility
+    plotVio(credibility, [1]*len(category), 1, axes, 'Density of Values', 'Credibility', 'Aggregate Credibility Values of Classifications')
+    # Save figure
+
+    figure_dest = f_name[0:-4]+'_aggregate.png'
+    plt.savefig(figure_dest, bbox_inches='tight')
+    print("Figure saved in ", figure_dest)
+
     
 #####################################
 # MAIN SCRIPT: Build, Classify, Output

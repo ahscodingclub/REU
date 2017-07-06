@@ -539,7 +539,7 @@ def plotVio(old, category, a, axes, xlabel, ylabel):
     axes[a].set_xticklabels(labels)    
     axes[a].set_xlabel(xlabel)
     axes[a].set_ylabel(ylabel)
-    axes[a].set_ylim([0,100])
+    axes[a].set_ylim([0,102])
     #return v
 
 # DRAW VIOLIN PLOTS FOR CONFIDENCE / CREDIBILITY
