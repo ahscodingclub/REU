@@ -66,7 +66,11 @@ def importAllData(set_name):
 ## SET TRAINING DATA 
 def setTrain(trn_data_array):
     global train_features
-    train_features = trn_data_array[:].tolist() # training data
+    global calib_features
+
+    split = int((6.0/7.0) * len(trn_data_array))
+    train_features = trn_data_array[:split].tolist() # training data
+    calib_features = trn_data_array[split:].tolist() # calibration data
     
 # EXTRACT DATA
 def getPigns(dataset):
@@ -333,6 +337,23 @@ def getCredibility(plv):
 def sum2D(input):
     return sum(map(sum, input))
 
+def getPAActual(predicted):
+  actual = []
+  csv_f = open(f_name[0:-4] + '_training' + '.csv')
+  csv_f = csv.reader(csv_f)
+  csv_f.next()
+
+  for pre in predicted:
+    for row in csv_f: 
+      train_act = [row[1], row[2], row[3], row[4], row[5]]
+      train_act = [float(x) for x in train_act]
+      train_pre = [row[6], row[7], row[8], row[9], row[10]]
+      train_pre = [float(x) for x in train_pre]
+      if(pre == train_pre):
+        actual.append(train_act)
+
+  return actual
+
 # Calculate Jeffreys Distance of two vectors
 def JeffreyDistance(v1,v2):
     out = 0
@@ -397,8 +418,8 @@ def writeData(train_or_test, filename, actual, predicted, confusion, credibility
         for row in confusion[i]:
             print(["{0:5.5}".format(str(val)) for val in row], file=f)
         agg_credibility += credibility[i]
-        print("Confidence = ", '{:.4}'.format(confidence[i]), file=f)
-        print("Credibility = ", '{:.4}'.format(credibility[i]), file=f)
+        print("Confidence = ", '{:.4}'.format(float(confidence[i])), file=f)
+        print("Credibility = ", '{:.4}'.format(float(credibility[i])), file=f)
     
     agg_credibility = agg_credibility/len(credibility)
     agg_confidence = 100*getAccuracy(agg_conf_matrix)/agg_credibility
@@ -407,9 +428,9 @@ def writeData(train_or_test, filename, actual, predicted, confusion, credibility
     for row in agg_conf_matrix:
             print(["{0:5.5}".format(str(val)) for val in row], file=f)
 
-    print("Credibility = ", '{:.4}'.format(agg_credibility), file=f)       
+    print("Credibility = ", '{:.4}'.format(float(agg_credibility)), file=f)       
  
-    print("Confidence = ", '{:.4}'.format(agg_confidence), file=f)
+    print("Confidence = ", '{:.4}'.format(float(agg_confidence)), file=f)
 
          
 #####################################
@@ -494,6 +515,7 @@ def plotVio(old, category, a, axes, xlabel, ylabel):
     axes[a].set_xticklabels(labels)    
     axes[a].set_xlabel(xlabel)
     axes[a].set_ylabel(ylabel)
+    axes[a].set_ylim([0,100])
 
 # DRAW VIOLIN PLOTS FOR CONFIDENCE / CREDIBILITY
 def violin(credibility, confidence, category):
@@ -614,14 +636,19 @@ for trn_ind, tst_ind in kf:
     test_confidence = []
     
     # Calculate the confusion matrix, accuracy, credibility and confidence 
-    #   of each training case   
+    #   of each training case 
     for i in range(len(trainLabels)):
         train_conf_matrix.append(getConfusionMatrix(trainLabels[i], actualTrain[i]))
         train_credibility.append(getCredibility(actualTrain[i]))
         train_confidence.append(100*getAccuracy(train_conf_matrix[i])/train_credibility[i])
 
     training_data = [train_conf_matrix, train_credibility, train_confidence, classes]
-
+  
+    writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0)
+    
+    ## P->A Heuristic (predicted to actual mapping for testing set)
+    pa_heur_act_test = getPAActual(testLabels)
+    
     # Calculate the confusion matrix, accuracy, credibility and confidence 
     #   of each testing case   
     for i in range(len(testLabels)):
@@ -652,10 +679,10 @@ testing_data = k_best[7]
 print ("\nWriting Data for best fold k =", k_best[0], "...\n") 
 
 # write training data
-writeData("Training", "../output/NewTrainOutput.csv", actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0)
+writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0)
 
 # write testing data
-writeData("Testing", "../output/NewTestOutput.csv", actualTest, testLabels, testing_data[0], testing_data[1], testing_data[2], len(trainLabels))
+writeData("Testing", f_name[0:-4] + '_testing' + '.csv', actualTest, testLabels, testing_data[0], testing_data[1], testing_data[2], len(trainLabels))
 
 # plot violin plots
 violin(testing_data[1],testing_data[2], testing_data[3])

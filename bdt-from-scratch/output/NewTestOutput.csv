@@ -1,11 +1,12 @@
-Nodule ID,Actual [1],Actual [2],Actual [3],Actual [4],Actual [5],Predicted [1],Predicted [2],Predicted [3],Predicted [4],Predicted [5],Confidence,Credibility,|['Perimeter', 'ConvexPerimeter', 'EquivDiameter', 'MajorAxisLength', 'MinorAxisLength', 'Elongation', 'Compactness', 'Eccentricity', 'Solidity', 'Extent', 'Circularity', 'RadialDistanceSD', 'SecondMoment', 'Roughness', 'MinIntensity', 'MaxIntensity', 'MeanIntensity', 'SDIntensity', 'MaxIntensityBG', 'SDIntensityBG', 'IntensityDifference', 'markov1', 'markov2', 'markov3', 'markov4', 'markov5', 'gabormean_0_0', 'gaborSD_0_0', 'gabormean_0_1', 'gaborSD_0_1', 'gabormean_0_2', 'gaborSD_0_2', 'gabormean_1_0', 'gabormean_1_1', 'gaborSD_1_1', 'gabormean_1_2', 'gaborSD_1_2', 'gabormean_2_0', 'gaborSD_2_0', 'gabormean_2_1', 'gaborSD_2_1', 'gabormean_2_2', 'gabormean_3_0', 'gaborSD_3_0', 'gabormean_3_1', 'gaborSD_3_1', 'gabormean_3_2', 'gaborSD_3_2', 'Contrast', 'Correlation', 'Energy', 'Homogeneity', 'Entropy', 'x_3rdordermoment', 'Inversevariance', 'Sumaverage', 'Variance', 'Clustertendency', 'MaxProbability']|
-113.0,0.0,0.25,0.5,0.25,0.0,0.03571428571428571,0.32142857142857145,0.42857142857142855,0.15476190476190477,0.05952380952380952,0.888888888888889,37.5
-124.0,0.0,0.25,0.25,0.0,0.5,0.10416666666666667,0.0,0.16666666666666666,0.20833333333333334,0.5208333333333334,0.8055555555555556,37.5
-126.0,0.0,0.0,0.25,0.25,0.5,0.10416666666666667,0.0,0.16666666666666666,0.20833333333333334,0.5208333333333334,0.9444444444444445,37.5
-127.0,0.0,0.0,0.25,0.0,0.75,0.10416666666666667,0.0,0.16666666666666666,0.20833333333333334,0.5208333333333334,0.6916666666666668,62.5
-130.0,0.0,0.0,0.25,0.0,0.75,0.10416666666666667,0.0,0.16666666666666666,0.20833333333333334,0.5208333333333334,0.6916666666666668,62.5
-133.0,0.0,0.0,0.5,0.5,0.0,0.03571428571428571,0.32142857142857145,0.42857142857142855,0.15476190476190477,0.05952380952380952,0.5833333333333333,50.0
-134.0,1.0,0.0,0.0,0.0,0.0,0.4375,0.16666666666666666,0.3333333333333333,0.0625,0.0,0.4375,100.0
-136.0,0.0,0.25,0.75,0.0,0.0,0.03571428571428571,0.32142857142857145,0.42857142857142855,0.15476190476190477,0.05952380952380952,0.6428571428571428,62.5
-137.0,0.0,0.0,0.25,0.75,0.0,0.03571428571428571,0.32142857142857145,0.42857142857142855,0.15476190476190477,0.05952380952380952,0.3571428571428571,62.5
-146.0,0.0,0.0,0.25,0.25,0.5,0.10416666666666667,0.0,0.16666666666666666,0.20833333333333334,0.5208333333333334,0.9444444444444445,37.5
+Nodule ID,Actual [1],Actual [2],Actual [3],Actual [4],Actual [5],Predicted [1],Predicted [2],Predicted [3],Predicted [4],Predicted [5],Confidence,Credibility,|['ConvexArea', 'Perimeter', 'ConvexPerimeter', 'EquivDiameter', 'MajorAxisLength', 'Elongation', 'Extent', 'Circularity', 'RadialDistanceSD', 'SecondMoment', 'Roughness', 'MinIntensity', 'MaxIntensity', 'MeanIntensity', 'SDIntensity', 'MinIntensityBG', 'MaxIntensityBG', 'MeanIntensityBG', 'SDIntensityBG', 'IntensityDifference', 'markov1', 'markov2', 'markov3', 'markov4', 'markov5', 'gabormean_0_0', 'gaborSD_0_0', 'gabormean_0_1', 'gaborSD_0_1', 'gabormean_0_2', 'gaborSD_0_2', 'gabormean_1_0', 'gaborSD_1_0', 'gaborSD_1_1', 'gabormean_1_2', 'gaborSD_1_2', 'gabormean_2_0', 'gaborSD_2_0', 'gabormean_2_1', 'gaborSD_2_1', 'gabormean_2_2', 'gaborSD_2_2', 'gabormean_3_0', 'gaborSD_3_0', 'gabormean_3_1', 'gaborSD_3_1', 'gabormean_3_2', 'gaborSD_3_2', 'Contrast', 'Correlation', 'Energy', 'Homogeneity', 'Entropy', 'x_3rdordermoment', 'Inversevariance', 'Sumaverage', 'Variance', 'Clustertendency', 'MaxProbability']|
+112.0,0,0,0,0,1,0.08333333333333333,0.0,0.0,0.08333333333333333,0.8333333333333334,83.33333333333334,100
+113.0,0,0,1,0,0,0.4166666666666667,0.16666666666666666,0.4166666666666667,0.0,0.0,41.66666666666667,100
+124.0,0,0,0,0,1,0.4166666666666667,0.16666666666666666,0.4166666666666667,0.0,0.0,0.0,100
+126.0,0,0,1,0,0,0.4166666666666667,0.16666666666666666,0.4166666666666667,0.0,0.0,41.66666666666667,100
+127.0,0,1,0,0,0,0.0,0.4,0.4,0.2,0.0,40.0,100
+130.0,1,0,0,0,0,0.08333333333333333,0.0,0.0,0.08333333333333333,0.8333333333333334,8.333333333333332,100
+133.0,0,0,0,0,1,0.4166666666666667,0.16666666666666666,0.4166666666666667,0.0,0.0,0.0,100
+134.0,1,0,0,0,0,0.4166666666666667,0.16666666666666666,0.4166666666666667,0.0,0.0,41.66666666666667,100
+136.0,1,0,0,0,0,0.4166666666666667,0.16666666666666666,0.4166666666666667,0.0,0.0,41.66666666666667,100
+137.0,0,0,0,0,1,0.08333333333333333,0.0,0.0,0.08333333333333333,0.8333333333333334,83.33333333333334,100
+146.0,0,0,0,1,0,0.0,0.4,0.4,0.2,0.0,20.0,100

@@ -70,8 +70,6 @@ def setTrain(trn_data_array):
     split = int((6.0/7.0) * len(trn_data_array))
     train_features = trn_data_array[:split].tolist() # training data
     calib_features = trn_data_array[split:].tolist() # calibration data
-    print("train_features: ", train_features)
-    print("length: ", len(train_features))
     
 # EXTRACT DATA
 def getPigns(dataset):
@@ -450,13 +448,13 @@ def writeData(trainOrTest, header, filename, params, actual, predicted, conf, cr
     print("\n" + trainOrTest + "\n")
     for row in confusion:
         print(["{0:5.5}".format(str(val)) for val in row])
-    print(trainOrTest,"Accuracy = ", '{:.4f}'.format(myAccuracy * 100), "%")
+    print(trainOrTest,"Accuracy = ", '{:.4f}'.format(float(myAccuracy * 100)), "%")
     
     # Output Confusion Matrices, Accuracies, AUCdt, and ROC AUC
     print("\n", trainOrTest, "Confusion Matrix", file=f)
     for row in confusion:
         print(["{0:5.5}".format(str(val)) for val in row], file=f)
-    print("Accuracy = ", '{:.4f}'.format(myAccuracy * 100), "%", file=f)
+    print("Accuracy = ", '{:.4f}'.format(float(myAccuracy * 100)), "%", file=f)
 
 #####################################
 # DRAW THE DECISION TREE
@@ -528,7 +526,6 @@ def plotVio(old, category, a, axes, xlabel, ylabel):
     for x in range (len(old)):
         new[labels.index(category[x])].append(old[x])
         
-    print("new: ", new)
     # Plot the information
     nans = np.array([float('nan'), float('nan')])
     try:  
@@ -542,6 +539,7 @@ def plotVio(old, category, a, axes, xlabel, ylabel):
     axes[a].set_xticklabels(labels)    
     axes[a].set_xlabel(xlabel)
     axes[a].set_ylabel(ylabel)
+    axes[a].set_ylim([0,100])
     #return v
 
 # DRAW VIOLIN PLOTS FOR CONFIDENCE / CREDIBILITY
@@ -691,11 +689,12 @@ print("length of p vals: ", len(p_vals))
 
 print ("\nWriting Data for best fold k =", k_best[0], "...") 
 
-writeData("Training", trainhead, "../output/TrainOutput.csv", "wb", actualTrain, trainLabels, confidence, credibility, classes, accuracy, p_vals, 0) 
-writeData("Testing", testhead, "../output/TestOutput.csv", "wb", actualTest, testLabels, confidence, credibility, classes, accuracy, p_vals, len(trainLabels))
+writeData("Training", trainhead, f_name[0:-4] + '_training' + '.csv', "wb", actualTrain, trainLabels, confidence, credibility, classes, accuracy, p_vals, 0) 
+
+writeData("Testing", testhead, f_name[0:-4] + '_testing' + '.csv', "wb", actualTest, testLabels, confidence, credibility, classes, accuracy, p_vals, len(trainLabels))
 
 
-violin(confidence, credibility, classes, 'Classification', 'hide')
+violin([100*x for x in confidence], [100*x for x in credibility], classes, 'Classification', 'hide')
     
 # Close output file
 f.close()
