@@ -328,29 +328,30 @@ def getAccuracy(class_matrix):
 # Calculate the maximum accuracy that can be achieved from a
 # probabilistic label vector
 def getCredibility(plv):
-    max_accuracy = 0 
-    for i in range(len(plv)):
-        max_accuracy += plv[i]*plv[i]*100
-    return max_accuracy
+    return getAccuracy(cross_product(plv, plv))
 
 # Sum elements in a 2D array
 def sum2D(input):
     return sum(map(sum, input))
 
 def getPAActual(predicted):
-  actual = []
+  actual = [0,0,0,0,0] * len(predicted)
   csv_f = open(f_name[0:-4] + '_training' + '.csv')
   csv_f = csv.reader(csv_f)
   csv_f.next()
 
-  for pre in predicted:
+  for i in range(0, len(predicted)):
+    pred = predicted[i]
+    find_count = 0
     for row in csv_f: 
       train_act = [row[1], row[2], row[3], row[4], row[5]]
       train_act = [float(x) for x in train_act]
-      train_pre = [row[6], row[7], row[8], row[9], row[10]]
-      train_pre = [float(x) for x in train_pre]
-      if(pre == train_pre):
-        actual.append(train_act)
+      train_pred = [row[6], row[7], row[8], row[9], row[10]]
+      train_pred = [float(x) for x in train_pred]
+      if(pred == train_pred):
+        actual[i] = np.add(actual[i], train_act)
+        find_count+=1
+    actual[i] = np.divide(actual[i], find_count)
 
   return actual
 
@@ -645,7 +646,10 @@ for trn_ind, tst_ind in kf:
     for i in range(len(trainLabels)):
         train_conf_matrix.append(getConfusionMatrix(trainLabels[i], actualTrain[i]))
         train_credibility.append(getCredibility(actualTrain[i]))
-        train_confidence.append(100*getAccuracy(train_conf_matrix[i])/train_credibility[i])
+        accy = 100*getAccuracy(train_conf_matrix[i])
+        if accy > train_credibility[i]:
+            accy -= train_credibility[i]
+        train_confidence.append(accy/train_credibility[i])
 
     training_data = [train_conf_matrix, train_credibility, train_confidence, classes]
   
@@ -659,7 +663,10 @@ for trn_ind, tst_ind in kf:
     for i in range(len(testLabels)):
         test_conf_matrix.append(getConfusionMatrix(testLabels[i], actualTest[i]))
         test_credibility.append(getCredibility(actualTest[i]))
-        test_confidence.append(100*getAccuracy(test_conf_matrix[i])/test_credibility[i])
+        accy = 100*getAccuracy(test_conf_matrix[i])
+        if accy > test_credibility[i]:
+            accy -= test_credibility[i]
+        test_confidence.append(accy/test_credibility[i])
 
     testing_data = [test_conf_matrix, test_credibility, test_confidence, classes]
 
