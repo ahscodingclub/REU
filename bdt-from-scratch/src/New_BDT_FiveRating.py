@@ -648,7 +648,7 @@ for trn_ind, tst_ind in kf:
         train_credibility.append(getCredibility(actualTrain[i]))
         accy = 100*getAccuracy(train_conf_matrix[i])
         if accy > train_credibility[i]:
-            accy -= train_credibility[i]
+            accy = train_credibility[i] - (accy - train_credibility[i])
         train_confidence.append(accy/train_credibility[i])
 
     training_data = [train_conf_matrix, train_credibility, train_confidence, classes]
@@ -665,7 +665,7 @@ for trn_ind, tst_ind in kf:
         test_credibility.append(getCredibility(actualTest[i]))
         accy = 100*getAccuracy(test_conf_matrix[i])
         if accy > test_credibility[i]:
-            accy -= test_credibility[i]
+            accy = test_credibility[i] - (accy - test_credibility[i])
         test_confidence.append(accy/test_credibility[i])
 
     testing_data = [test_conf_matrix, test_credibility, test_confidence, classes]
