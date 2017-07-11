@@ -39,6 +39,7 @@ import copy
 from sklearn.metrics import confusion_matrix # Assess misclassification
 from scipy import spatial # Cosine similarity 
 import ast
+import sys
 from sklearn.cross_validation import KFold
 #####################################
 # GATHERING DATA
@@ -314,15 +315,35 @@ def getMax(lst):
     else:
         return (sum(mx_vals)/len(mx_vals))
     
+# calculate the conformity of all training cases, with the nonconformity measure
+# being the distance to the nearest neighbor with the same class divided by the
+# distance to the nearest neighbor with a different class. Cosine similarity
+# will be used to calculate distance. This function will return an array of conformity 
+# measures for every element in the set of cases set in arguments
 def Train_Conformity(actual, predicted):
-    conform = []
-    for i in range(len(actual)):
-        actual_class = getMax(actual[i]) #maximum value of predicted
-        max_ind = actual_class        
-        pred = predicted[i][max_ind] #probability of predicted chosen predicted label
-        max_val = max([prob for k,prob in enumerate(predicted[i]) if k != max_ind]) #max value in subset without chosen label
-        conform.append(pred - max_val) #append conformity score
-    return conform
+    conformity_measures = []
+    for i in range(0,len(predicted)): # for each case
+        closest_same = sys.maxint
+        closest_diff = sys.maxint
+        for j in range(0,len(actual)): # calculate distances to each case
+            # calculate the distance to the current case, excluding the class ratings
+            cur_distance = spatial.distance.euclidean(predicted[i][:-4], actual[i][:-4])
+            same = same_class_p(predicted[i], actual[j])
+            print("same: ", same)
+            print("predicted: ", predicted[i])
+            print("actual: ", actual[j])
+            print("distance: ", cur_distance)
+            if same and cur_distance < closest_same:
+                closest_same = cur_distance
+                print("changing closest same to: ", closest_same)
+            if not(same) and cur_distance < closest_diff:
+                closest_diff = cur_distance 
+                print("changing diff same to: ", closest_diff)
+        conformity_measures.append(closest_same/closest_diff)
+    return conformity_measures
+
+def same_class_p(actual, predicted):
+    return getMax(actual[-4:]) == getMax(predicted[-4:])
 
 def Test_Conformity(predicted):
     conform = []
@@ -464,7 +485,7 @@ def writeData(trainOrTest, header, filename, params, actual, predicted, conf, cr
 def getTrees(tf,head,np,nc,mind,md, switch):
     param = [np,nc,md]
     if(switch):
-         with open("../output/tree.txt","wb") as t:
+         with open("../../output/tree.txt","wb") as t:
             trees = [param,createTree(train_features, header, nparent, nchild, mind, maxdepth)]
             t.write(trees.__repr__())
             return trees[1]
@@ -581,7 +602,11 @@ pignType = None
 while pignType != 1 and pignType != 2 and pignType != 3 and pignType != 4:
     pignType = input("Pignistic Type?\n1.Mean\n2.Median\n3.Mode\n4.Distribution\n\ntype: ")
 
-#file output settings
+outputType = None
+while outputType != 1 and outputType != 2 and outputType != 3 and outputType != 4:
+    pignType = input("Pignistic Type?\n1.Mean\n2.Median\n3.Mode\n4.Distribution\n\ntype: ")
+
+# file output settings
 f_name = raw_input("file for confusion matrix: ") 
 f = open(f_name, "w")
 
@@ -590,7 +615,7 @@ var_set = None
 while var_set != "y" and var_set != "n":
     var_set = raw_input("testing?(y/n): ")
 
-importIdData("../data/clean/LIDC_809_Complete.csv")
+importIdData("../../data/clean/LIDC_809_Complete.csv")
 
 kfolds = 6
 nparent = 24
@@ -598,9 +623,9 @@ nchild = 12
 maxdepth = 25
 
 if(var_set == "n"):
-    importAllData("../data/modeBalanced/ModeBalanced_170_LIDC_809_Random.csv")
+    importAllData("../../data/modeBalanced/ModeBalanced_170_LIDC_809_Random.csv")
 elif(var_set == "y"):
-    importAllData("../data/modeBalanced/testing_file.csv")
+    importAllData("../../data/modeBalanced/testing_file.csv")
     
 test_header = copy.copy(header)
 
@@ -633,11 +658,6 @@ for trn_ind, tst_ind in kf:
     # setting "switch = True" will make new tree each time
     tree = getTrees(train_features, header, nparent, nchild, 0, maxdepth, True) 
 
-    #graphing the tree
-#    graph = pydot.Dot(graph_type='graph')
-#    visit(tree)
-#    graph.write_png("BDT.png")
-    
     # Get actual data
     actualTrain = getPigns(train_features)
     actualTest = getPigns(test_features)
@@ -656,6 +676,7 @@ for trn_ind, tst_ind in kf:
     print("Computing Calibration Conformity...")
     actualCalib = getPigns(calib_features)
     calib_conf = Train_Conformity(actualCalib, calibLabels)
+    print("calib_conf:", calib_conf)
     
     # Classify testing set
     print ("Classifying Testing Set...") 
@@ -679,7 +700,7 @@ for trn_ind, tst_ind in kf:
         credibility.append(max(val))
     
     # increase round of k-fold vlaidation
-    conf_matrix = getConfusionMatrix(testLabels, actualTest)
+    conf_matrix = getConfusionMatrix(testLabels, actualTest, outputType)
     accy = getAccuracy(conf_matrix)
     if accy > k_best[1]:
         k_best = [k_round, accy, actualTrain, trainLabels, actualTest, testLabels, confidence, credibility, classes]

@@ -1,0 +1,8 @@
+Author's main field is in image enrichment to help disease diagnosis
+
+Focuses are in mamorgraphy, ultrasound and mri
+
+An issue with mammorgraphy is that it cannot distinguish between tumor
+and dense tissue
+
+
