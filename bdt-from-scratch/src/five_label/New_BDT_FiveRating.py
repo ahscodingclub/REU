@@ -385,12 +385,12 @@ def writeData(train_or_test, filename, actual, predicted, confusion, credibility
             writer.writerow(['Nodule ID',\
                              'Actual [1]',      'Actual [2]',       'Actual [3]',       'Actual [4]',       'Actual [5]',\
                              'Predicted [1]' ,  'Predicted [2]',    'Predicted [3]',    'Predicted [4]',    'Predicted [5]',\
-                              header])
+                             'Confidence', 'Credibility'])
         else:
             writer.writerow(['Nodule ID',\
                              'Actual [1]',      'Actual [2]',       'Actual [3]',       'Actual [4]',       'Actual [5]',\
                              'Predicted [1]' ,  'Predicted [2]',    'Predicted [3]',    'Predicted [4]',    'Predicted [5]',\
-                             'Confidence', 'Credibility', header])
+                             'Confidence', 'Credibility'])
 
         
         for i in range(0, len(predicted)):
@@ -399,12 +399,13 @@ def writeData(train_or_test, filename, actual, predicted, confusion, credibility
                 writer.writerow([set_data_array[i+id_start][2],\
                                  actual[i][0], actual[i][1], actual[i][2], actual[i][3], actual[i][4],\
                                  predicted[i][0], predicted[i][1], predicted[i][2], predicted[i][3], predicted[i][4],\
+                                 confidence[i], credibility[i]
                                 ])
             else:
                 writer.writerow([set_data_array[i+id_start][2],\
                                  actual[i][0], actual[i][1], actual[i][2], actual[i][3], actual[i][4],\
                                  predicted[i][0], predicted[i][1], predicted[i][2], predicted[i][3], predicted[i][4],\
-                                 confidence[i], credibility[i],])
+                                 confidence[i], credibility[i]])
     if(training):
       return 
     # Computing aggregate confidence and credibility
@@ -437,7 +438,7 @@ def writeData(train_or_test, filename, actual, predicted, confusion, credibility
 def getTrees(tf,head,np,nc,mind,md, switch):
     param = [np,nc,md]
     if(switch):
-         with open("../output/tree.txt","wb") as t:
+         with open("../../output/tree.txt","wb") as t:
             trees = [param,createTree(train_features, header, nparent, nchild, mind, maxdepth)]
             t.write(trees.__repr__())
             return trees[1]
@@ -564,7 +565,7 @@ var_set = None
 while var_set != "y" and var_set != "n":
     var_set = raw_input("testing?(y/n): ")
 
-importIdData("../data/clean/LIDC_809_Complete.csv")
+importIdData("../../data/clean/LIDC_809_Complete.csv")
 
 kfolds = 6
 nparent = 24
@@ -572,9 +573,9 @@ nchild = 12
 maxdepth = 25
 
 if(var_set == "n"):
-    importAllData("../data/modeBalanced/ModeBalanced_170_LIDC_809_Random.csv")
+    importAllData("../../data/modeBalanced/ModeBalanced_170_LIDC_809_Random.csv")
 elif(var_set == "y"):
-    importAllData("../data/modeBalanced/testing_file.csv")
+    importAllData("../../data/modeBalanced/testing_file.csv")
     
 test_header = copy.copy(header)
 
@@ -646,14 +647,12 @@ for trn_ind, tst_ind in kf:
     for i in range(len(trainLabels)):
         train_conf_matrix.append(getConfusionMatrix(trainLabels[i], actualTrain[i]))
         train_credibility.append(getCredibility(actualTrain[i]))
-        accy = 100*getAccuracy(train_conf_matrix[i])
-        if accy > train_credibility[i]:
-            accy = train_credibility[i] - (accy - train_credibility[i])
-        train_confidence.append(accy/train_credibility[i])
+        accy = getAccuracy(train_conf_matrix[i])
+        train_confidence.append(100-abs(train_credibility[i]-accy))
 
     training_data = [train_conf_matrix, train_credibility, train_confidence, classes]
   
-    writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0, True)
+    writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0, False)
     
     ## P->A Heuristic (predicted to actual mapping for testing set)
     pa_heur_act_test = getPAActual(testLabels)
@@ -663,10 +662,8 @@ for trn_ind, tst_ind in kf:
     for i in range(len(testLabels)):
         test_conf_matrix.append(getConfusionMatrix(testLabels[i], actualTest[i]))
         test_credibility.append(getCredibility(actualTest[i]))
-        accy = 100*getAccuracy(test_conf_matrix[i])
-        if accy > test_credibility[i]:
-            accy = test_credibility[i] - (accy - test_credibility[i])
-        test_confidence.append(accy/test_credibility[i])
+        accy = getAccuracy(test_conf_matrix[i])
+        test_confidence.append(100-abs(test_credibility[i]-accy))
 
     testing_data = [test_conf_matrix, test_credibility, test_confidence, classes]
 

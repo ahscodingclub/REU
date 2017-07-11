@@ -25,4 +25,7 @@ y=x
 
 cross = cross_product(x,y)
 
+for row in cross:
+    print(["{0:5.5}".format(str(val)) for val in row])
+
 print("Max Accuracy = ", '{:.4f}'.format(getAccuracy(cross)* 100, "%"))
