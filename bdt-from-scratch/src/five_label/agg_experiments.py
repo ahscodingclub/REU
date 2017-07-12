@@ -385,18 +385,41 @@ def PValue(test, calib):
 # calculate a confusion matrix given predicted and actual, using full complexity of BBA
 # returns an array of confusion matrices
 def getConfusionMatrix(predicted,actual,output_type):
-    conf_mat = [[0,0,0,0,0],
-                [0,0,0,0,0],
-                [0,0,0,0,0],
-                [0,0,0,0,0],
-                [0,0,0,0,0]]
-    if output_type == 4:
-        for i in range(0,len(predicted)):
-            conf_mat = np.add(conf_mat, cross_product(predicted[i],actual[i]))
-    else: 
+    #mean
+    if output_type == 1:
+        tst_proba = [int(round(1*case[0]+2*case[1]+3*case[2]+4*case[3]+5*case[4])) for case in predicted]
+        act_proba = [getMax(case)+1 for case in actual]
+        conf_mat = confusion_matrix(act_proba,tst_proba, labels=[1,2,3,4,5])
+        
+    #median
+    elif output_type == 2:
+        tst_proba = []
+        for case in predicted: 
+            pred_index = 0
+            prob_total = 0
+            while prob_total < .5:
+                prob_total += case[pred_index]
+                pred_index += 1
+            tst_proba.append(pred_index)
+        act_proba = [getMax(case)+1 for case in actual]
+        conf_mat = confusion_matrix(act_proba,tst_proba, labels=[1,2,3,4,5])
+
+    #mode
+    elif output_type == 3:
         tst_proba = [getMax(case)+1 for case in predicted]
         act_proba = [getMax(case)+1 for case in actual]
-        conf_mat = confusion_matrix(act_proba,tst_proba)
+        conf_mat = confusion_matrix(act_proba,tst_proba, labels=[1,2,3,4,5])
+
+    #distribution
+    elif output_type == 4:
+        conf_mat = [[0,0,0,0,0],
+                    [0,0,0,0,0],
+                    [0,0,0,0,0],
+                    [0,0,0,0,0],
+                    [0,0,0,0,0]]
+        for i in range(0,len(predicted)):
+            conf_mat = np.add(conf_mat, cross_product(predicted[i],actual[i]))
+
     return conf_mat
 
 def cross_product(X,Y):
@@ -453,8 +476,7 @@ def writeData(trainOrTest, header, filename, params, actual, predicted, conf, cr
             writer.writerow(['Nodule ID',\
                              'Actual [1]',      'Actual [2]',       'Actual [3]',       'Actual [4]',       'Actual [5]',\
                              'Predicted [1]' ,  'Predicted [2]',    'Predicted [3]',    'Predicted [4]',    'Predicted [5]',\
-                             'Confidence', 'Credibility', 'Sureness of Case', 'Classes', header])
-            testConform = Train_Conformity(predicted, actual)
+                              header])
 
         
         for i in range(0, len(predicted)):
@@ -468,7 +490,7 @@ def writeData(trainOrTest, header, filename, params, actual, predicted, conf, cr
                 writer.writerow([set_data_array[i+id_start][2],\
                                  actual[i][0], actual[i][1], actual[i][2], actual[i][3], actual[i][4],\
                                  predicted[i][0], predicted[i][1], predicted[i][2], predicted[i][3], predicted[i][4],\
-                                 conf[i], cred[i], testConform[i], classes[i]])
+                                 ])
         
         # For each case at this node
         #print(len(actual),len(predicted))
@@ -477,7 +499,7 @@ def writeData(trainOrTest, header, filename, params, actual, predicted, conf, cr
 
 
 
-    confusion = getConfusionMatrix(predicted, actual)
+    confusion = getConfusionMatrix(predicted, actual, output_type)
     myAccuracy = getAccuracy(confusion)
     
     # Output to Console
@@ -618,6 +640,8 @@ def violin(credibility, confidence, category):
 args = sys.argv[1:]
 print("args: ", args)
 
+global output_type
+
 if len(args) == 0:
     pignType = None
     while pign_type != 1 and pignType != 2 and pignType != 3 and pignType != 4:
@@ -705,30 +729,20 @@ for trn_ind, tst_ind in kf:
     
     # Compute Calibration Conformity
     print("Computing Calibration Conformity...")
-    actualCalib = getPigns(calib_features)
-    calib_conf = Train_Conformity(actualCalib, calibLabels)
-    print("calib_conf:", calib_conf)
+    #actualCalib = getPigns(calib_features)
+    #calib_conf = Train_Conformity(actualCalib, calibLabels)
+    #print("calib_conf:", calib_conf)
     
     # Classify testing set
     print ("Classifying Testing Set...") 
     for i in range(0,len(test_features)):
             testLabels.append(classify(tree, test_header,test_features[i]))
             
-    # Compute final conformity and p-values
-    print("Computing Testing Conformity...")
-    test_conf = Test_Conformity(testLabels)
-    p_vals = PValue(test_conf,calib_conf)
-
     confidence = []
     credibility = []
     classes = []
     
-    for i, val in enumerate(p_vals):
-        m = val.index(max(val))
-        sec = max([x for k,x in enumerate(val) if k != m])
-        classes.append(testLabels[i].index(max(testLabels[i]))+1)
-        confidence.append(1 - sec)
-        credibility.append(max(val))
+    [classes.append(testLabels[i].index(max(testLabels[i]))+1) for i in range(0,len(testLabels))]
     
     # increase round of k-fold vlaidation
     conf_matrix = getConfusionMatrix(testLabels, actualTest, output_type)
@@ -749,9 +763,9 @@ classes = k_best[8]
 
 print ("\nWriting Data for best fold k =", k_best[0], "...") 
 
-writeData("Training", trainhead, f_name[0:-4] + '_training' + '.csv', "wb", actualTrain, trainLabels, confidence, credibility, classes, accuracy, p_vals, 0) 
+writeData("Training", trainhead, f_name[0:-4] + '_training' + '.csv', "wb", actualTrain, trainLabels, None, None, classes, accuracy, None, 0) 
 
-writeData("Testing", testhead, f_name[0:-4] + '_testing' + '.csv', "wb", actualTest, testLabels, confidence, credibility, classes, accuracy, p_vals, len(trainLabels))
+writeData("Testing", testhead, f_name[0:-4] + '_testing' + '.csv', "wb", actualTest, testLabels, None, None, classes, accuracy, None, len(trainLabels))
 
 
 violin([100*x for x in confidence], [100*x for x in credibility], classes)

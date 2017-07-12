@@ -5,4 +5,79 @@ Focuses are in mamorgraphy, ultrasound and mri
 An issue with mammorgraphy is that it cannot distinguish between tumor
 and dense tissue
 
+Computer aided detetection is often used in screening, decreasing the 
+amound of misses by drawing attention to possible regions
+
+Precision Medicine Initiative: nned the right treatment for the right 
+patient at the right time, using technology
+
+there are a lot differences across and within tumors
+
+can features coupled with genomics(sampling) produce a higher predictive power?
+
+in the discovery stage, relationships are found between images and genomics (imaging genomics)
+
+diagnostic imaging: biopsy results, genetics, testing results
+  trying to relate imaging to everything else
+  THEY ARE NOT TRYING TO IRRADICATE NECESSITY OF BIOPSY
+
+translation: predictive modeling, applying prior knowledge
+
+radiomics have only been called that for a few years
+
+deep learning was in the first FDA approved CAD
+
+in conventional cad, tumor features are extracted before classified
+
+in deep learning, only the localized tumor, with no extracted features
+are the input
+
+tumor segmentation is strongly dependent in how good the output of features
+and later classifiers will be
+
+fuzzy c means was used to process uptake/time lines to determine threshold
+of hetergeniety for malignant
+
+fuzzy c means for background and tumor, then again for kinetic analysis
+  in order to determine what class is benign and malignent, you can 
+  look at uptake thresholds
+
+fuzzy c means output trend is used as the most enhancing uptake curve
+
+feature selection
+
+OUTPUT WAS A HISTOGRAM OF TRAINING EXAMPLES, WITH AN ARROW OF WHERE
+THIS CASE FALLS 
+
+2% is used as a high enough level to biopsy
+
+lecun -- deep learning for filering of classification of calcification
+ 
+deep learning as classifier of probability of malignancy is possible
+
+author uses deep learning as a feature extractor for the tumor
+
+image net set are pretrained convolutional neural nets
+
+the activations of layers of the cnn become features for classifier
+
+0 variance features are removed (non helpful features)
+
+TCGA and TCIA public data sets 
+
+TCGA assembler pulls all data together from online and assembles case
+genomics and radiomics together
+
+spatially correlated muli-omics analyses is the new goal
+  they need to relate the pathology to the histomics
+
+ROC CURVIVE
+
+sensitivity = TPF (selecting all candidates)
+specificity = 1-FPF (overcall)
+
+reader studies are how reading improves when using cad
+
+
+
 
