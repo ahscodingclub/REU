@@ -32,7 +32,11 @@ import pydot # Plotting decision trees
 import pandas as pd # Don't delete this. Just don't.
 import numpy as np # Numpy arrays
 import matplotlib
+
+#set the display to default display
+#so no errors when run on a server
 matplotlib.use("Agg")
+
 import matplotlib.pyplot as plt
 import csv # Read and write csv files
 import time # for testing purposes
@@ -40,7 +44,13 @@ import copy
 from sklearn.metrics import confusion_matrix # Assess misclassification
 from scipy import spatial # Cosine similarity 
 import ast
-from sklearn.cross_validation import KFold
+import sys
+import warnings
+
+# silence warnings for old sklearn kfold 
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore",category=DeprecationWarning)
+    from sklearn.cross_validation import KFold
 #####################################
 # GATHERING DATA
 #####################################
@@ -83,7 +93,7 @@ def getPigns(dataset):
         
         # Convert radiologist ratings into pignistic probability distributions
 
-        if pignType == 1:      #mean
+        if pign_type == 1:      #mean
             sum = 0
             for i in currentLabel:     # Count number of instances of each rating
                 sum += i
@@ -92,9 +102,8 @@ def getPigns(dataset):
             if mean-int(math.floor(mean)) != 0:
                 pign[int(math.floor(mean))] = mean - math.floor(mean)
 
-        elif pignType == 2:    #median
-            a = np.array(currentLabel)
-            median = np.median(a)
+        elif pign_type == 2:    #median
+            median = getMedian(currentLabel)
             if float(median).is_integer():
                 pign[int(math.floor(median))-1] = 1
             else:
@@ -102,11 +111,11 @@ def getPigns(dataset):
                 if median-math.floor(median) != 0:
                     pign[int(math.floor(median))] = median - math.floor(median)
 
-        elif pignType == 3:    #mode (which appears most often, majority vote)
-            mode = int(scipy.stats.mode(np.array(currentLabel))[0][0])
+        elif pign_type == 3:    #mode (which appears most often, majority vote)
+            mode = getMode(currentLabel) 
             pign[mode-1] = 1
 
-        elif pignType == 4:    #distribution
+        elif pign_type == 4:    #distribution
             pign = []
             for i in range (0, 6): # Count number of instances of each rating
                 if i == 0:
@@ -305,8 +314,72 @@ def classify(inputTree, featLabels, testVec):
 
 # calculate a confusion matrix given predicted and actual, using full complexity of BBA
 # returns one confusion matrix 
-def getConfusionMatrix(predicted,actual):
-  return cross_product(predicted,actual)
+#def getConfusionMatrix(predicted,actual):
+#  return cross_product(predicted,actual)
+def getMax(lst):
+    mx = max(lst)
+    mx_vals = []
+    
+    for k,x in enumerate(lst):
+        if x == mx:
+            mx_vals.append(k)
+    if len(mx_vals) == 1:
+        return mx_vals[0]
+    else:
+        return (sum(mx_vals)/len(mx_vals))
+
+def getMedian(case):
+    case.sort()
+    while(len(case) > 2):
+        case = case[1:-1]
+        if len(case) == 1:
+            return case[0]
+        else:
+            return (float(case[0])+case[1])/2
+
+def getMode(case):
+    counts = [0]*5
+    for vote in case:
+        counts[int(vote)-1]+=1
+    return getMax(counts)+1
+
+def getConfusionMatrix(predicted,actual,output_type):
+    #mean
+    if output_type == 1:
+        tst_proba = [int(round(1*case[0]+2*case[1]+3*case[2]+4*case[3]+5*case[4])) for case in predicted]
+        act_proba = [getMax(case)+1 for case in actual]
+        conf_mat = confusion_matrix(act_proba,tst_proba, labels=[1,2,3,4,5])
+        
+    #median
+    elif output_type == 2:
+        tst_proba = []
+        for case in predicted: 
+            pred_index = 0
+            prob_total = 0
+            while prob_total < .5:
+                prob_total += case[pred_index]
+                pred_index += 1
+            tst_proba.append(pred_index)
+        act_proba = [getMax(case)+1 for case in actual]
+        conf_mat = confusion_matrix(act_proba,tst_proba, labels=[1,2,3,4,5])
+
+    #mode
+    elif output_type == 3:
+        tst_proba = [getMax(case)+1 for case in predicted]
+        act_proba = [getMax(case)+1 for case in actual]
+        conf_mat = confusion_matrix(act_proba,tst_proba, labels=[1,2,3,4,5])
+
+    #distribution
+    elif output_type == 4:
+        conf_mat = [[0,0,0,0,0],
+                    [0,0,0,0,0],
+                    [0,0,0,0,0],
+                    [0,0,0,0,0],
+                    [0,0,0,0,0]]
+        for i in range(0,len(predicted)):
+            conf_mat = np.add(conf_mat, cross_product(predicted[i],actual[i]))
+
+    return conf_mat
 
 def cross_product(X,Y):
     product = [ [ 0 for y in range(len(Y)) ] for x in range(len(X)) ]
@@ -323,7 +396,7 @@ def getAccuracy(class_matrix):
     accy = 0.0
     for j in range(0,5):
         accy += class_matrix[j][j]
-    return 100 *accy / sum2D(class_matrix)
+    return 100 * float(accy) / sum2D(class_matrix)
 
 # Calculate the maximum accuracy that can be achieved from a
 # probabilistic label vector
@@ -335,12 +408,17 @@ def sum2D(input):
     return sum(map(sum, input))
 
 def getPAActual(predicted):
+  typicality = []
+  agreement = []
   actual = [0,0,0,0,0] * len(predicted)
-  csv_f = open(f_name[0:-4] + '_training' + '.csv')
-  csv_f = csv.reader(csv_f)
-  csv_f.next()
-
+  
   for i in range(0, len(predicted)):
+    csv_f = open(f_name[0:-4] + '_training' + '.csv')
+    csv_f = csv.reader(csv_f)
+    csv_f.next()
+    typ = 0
+    agg = 0
+    total_cases = 0
     pred = predicted[i]
     find_count = 0
     for row in csv_f: 
@@ -348,13 +426,17 @@ def getPAActual(predicted):
       train_act = [float(x) for x in train_act]
       train_pred = [row[6], row[7], row[8], row[9], row[10]]
       train_pred = [float(x) for x in train_pred]
+      total_cases += 1
       if(pred == train_pred):
         actual[i] = np.add(actual[i], train_act)
         find_count+=1
+        agg += train_act[getMax(train_pred)-1]
+    
     actual[i] = np.divide(actual[i], find_count)
+    typicality.append(float(find_count)/total_cases)
+    agreement.append(agg/find_count)
 
-  return actual
-
+  return typicality, agreement
 # Calculate Jeffreys Distance of two vectors
 def JeffreyDistance(v1,v2):
     out = 0
@@ -376,7 +458,7 @@ def JeffreyDistance(v1,v2):
 #####################################
 # OUTPUT RESULTS DATAFILES
 #####################################
-def writeData(train_or_test, filename, actual, predicted, confusion, credibility, confidence, id_start,training):
+def writeData(train_or_test, filename, actual, predicted, confusion, typicality, agreement, id_start,training):
     
     with open(filename, 'wb') as csvfile:
         writer = csv.writer(csvfile, delimiter=',',
@@ -390,8 +472,9 @@ def writeData(train_or_test, filename, actual, predicted, confusion, credibility
             writer.writerow(['Nodule ID',\
                              'Actual [1]',      'Actual [2]',       'Actual [3]',       'Actual [4]',       'Actual [5]',\
                              'Predicted [1]' ,  'Predicted [2]',    'Predicted [3]',    'Predicted [4]',    'Predicted [5]',\
-                             'Confidence', 'Credibility'])
-
+                             'Typicality', 'Agreement'])
+  
+        
         
         for i in range(0, len(predicted)):
             # Write data and similarity measures to file
@@ -399,36 +482,34 @@ def writeData(train_or_test, filename, actual, predicted, confusion, credibility
                 writer.writerow([set_data_array[i+id_start][2],\
                                  actual[i][0], actual[i][1], actual[i][2], actual[i][3], actual[i][4],\
                                  predicted[i][0], predicted[i][1], predicted[i][2], predicted[i][3], predicted[i][4],\
-                                 confidence[i], credibility[i]
                                 ])
+              
             else:
                 writer.writerow([set_data_array[i+id_start][2],\
                                  actual[i][0], actual[i][1], actual[i][2], actual[i][3], actual[i][4],\
                                  predicted[i][0], predicted[i][1], predicted[i][2], predicted[i][3], predicted[i][4],\
-                                 confidence[i], credibility[i]])
-    if(training):
-      return 
+                                 typicality[i], agreement[i]
+                                ])
+
     # Computing aggregate confidence and credibility
-    agg_conf_matrix = np.multiply(0, copy.deepcopy(confusion[0]))
-    agg_confidence = 0
-    agg_credibility = 0
-
-    print("\n\n" + train_or_test, file=f)
-    for i in range(0,len(confusion)):
-        agg_conf_matrix = np.add(agg_conf_matrix, confusion[i])
-        agg_credibility += credibility[i]
+    confusion = getConfusionMatrix(predicted, actual, output_type)
+    myAccuracy = getAccuracy(confusion)
     
-    agg_credibility = agg_credibility/len(credibility)
-    agg_confidence = 100*getAccuracy(agg_conf_matrix)/agg_credibility
+    # Output to Console
+    print("\n" + train_or_test + "\n")
+    for row in confusion:
+        print(["{0:5.5}".format(str(val)) for val in row])  
+    print("Accuracy: ", '{:.4f}'.format(float(myAccuracy)), "%")
 
-    print("\n\nAggregate Results: ", file=f)
-    for row in agg_conf_matrix:
-            print(["{0:5.5}".format(str(val)) for val in row], file=f)
-
-    print("Credibility = ", '{:.4}'.format(float(agg_credibility)), file=f)       
- 
-    print("Confidence = ", '{:.4}'.format(float(agg_confidence)), file=f)
-
+    # Output Confusion Matrices, Accuracies, AUCdt, and ROC AUC
+    print("\n\n", train_or_test, "Confusion Matrix", file=f)
+    for row in confusion:
+        print(["{0:5.5}".format(str(val)) for val in row], file=f)
+    print("Accuracy: ", '{:.4f}'.format(float(myAccuracy)), "%", file=f)
+    
+    if train_or_test == "Testing":
+      print("Typicality: ", np.sum(typicality)/len(typicality), file=f)
+      print("Agreement: ", np.sum(agreement)/len(agreement), file=f)
          
 #####################################
 # DRAW THE DECISION TREE
@@ -552,18 +633,40 @@ def violin(credibility, confidence, category):
 #####################################       
 # Setup
 #input loop for PLV settings
-pignType = None
-while pignType != 1 and pignType != 2 and pignType != 3 and pignType != 4:
-    pignType = input("Pignistic Type?\n1.Mean\n2.Median\n3.Mode\n4.Distribution\n\ntype: ")
+#arguments to script are [pignisitic type(1-4), output comparison type(1-4), output file name(string), testing/traing(y/n)] 
+args = sys.argv[1:]
+print("args: ", args)
 
-#file output settings
-f_name = raw_input("file for confusion matrix: ") 
+global output_type
+
+if len(args) == 0:
+    pign_type = None
+    while pign_type != 1 and pign_type != 2 and pign_type != 3 and pign_type != 4:
+        pign_type = input("Pignistic Type?\n1.Mean\n2.Median\n3.Mode\n4.Distribution\n\ntype: ")
+    
+    output_type = None
+    while output_type != 1 and output_type != 2 and output_type != 3 and output_type != 4:
+        pign_type = input("Pignistic Type?\n1.Mean\n2.Median\n3.Mode\n4.Distribution\n\ntype: ")
+    
+    # file output settings
+    f_name = raw_input("file for confusion matrix: ") 
+    
+    #input loop for variable settings
+    var_set = None
+    while var_set != "y" and var_set != "n":
+        var_set = raw_input("testing?(y/n): ")
+elif len(args) == 4:
+    pign_type = int(args[0])
+    output_type = int(args[1])
+    f_name = args[2]
+    var_set = args[3]
+else:
+    print("arguments to script are [pignisitic type(1-4), output comparison type(1-4), output file name(string), testing/traing(y/n)]")
+    sys.exit()
+
+#open the output file
 f = open(f_name, "w")
 
-#input loop for variable settings
-var_set = None
-while var_set != "y" and var_set != "n":
-    var_set = raw_input("testing?(y/n): ")
 
 importIdData("../../data/clean/LIDC_809_Complete.csv")
 
@@ -642,37 +745,20 @@ for trn_ind, tst_ind in kf:
     test_credibility = []
     test_confidence = []
     
-    # Calculate the confusion matrix, accuracy, credibility and confidence 
-    #   of each training case 
-    for i in range(len(trainLabels)):
-        train_conf_matrix.append(getConfusionMatrix(trainLabels[i], actualTrain[i]))
-        train_credibility.append(getCredibility(actualTrain[i]))
-        accy = getAccuracy(train_conf_matrix[i])
-        train_confidence.append(100-abs(train_credibility[i]-accy))
-
     training_data = [train_conf_matrix, train_credibility, train_confidence, classes]
   
     writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0, False)
     
     ## P->A Heuristic (predicted to actual mapping for testing set)
-    pa_heur_act_test = getPAActual(testLabels)
+    typicality, agreement = getPAActual(testLabels)
     
-    # Calculate the confusion matrix, accuracy, credibility and confidence 
-    #   of each testing case   
-    for i in range(len(testLabels)):
-        test_conf_matrix.append(getConfusionMatrix(testLabels[i], actualTest[i]))
-        test_credibility.append(getCredibility(actualTest[i]))
-        accy = getAccuracy(test_conf_matrix[i])
-        test_confidence.append(100-abs(test_credibility[i]-accy))
+    conf_matrix = getConfusionMatrix(testLabels, actualTest, output_type)
+    accuracy = getAccuracy(conf_matrix)
 
     testing_data = [test_conf_matrix, test_credibility, test_confidence, classes]
-
-    accuracy = np.sum(test_confidence)/len(test_confidence)
-    
-    print("accuracy: ", accuracy, " for fold ", k_round)
    
     if accuracy > k_best[1]:
-        k_best = [k_round, accuracy, actualTrain, trainLabels, actualTest, testLabels, training_data, testing_data]
+        k_best = [k_round, accuracy, actualTrain, trainLabels, actualTest, testLabels, training_data, testing_data, typicality, agreement]
 
     # increase round of k-fold vlaidation
     k_round += 1
@@ -684,6 +770,8 @@ actualTest = k_best[4]
 testLabels = k_best[5]
 training_data = k_best[6]
 testing_data = k_best[7]
+typicality = k_best[8]
+agreement = k_best[9]
 
 print ("\nWriting Data for best fold k =", k_best[0], "...\n") 
 
@@ -691,10 +779,7 @@ print ("\nWriting Data for best fold k =", k_best[0], "...\n")
 writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0, False)
 
 # write testing data
-writeData("Testing", f_name[0:-4] + '_testing' + '.csv', actualTest, testLabels, testing_data[0], testing_data[1], testing_data[2], len(trainLabels), False)
-
-# plot violin plots
-violin(testing_data[1],testing_data[2], testing_data[3])
+writeData("Testing", f_name[0:-4] + '_testing' + '.csv', actualTest, testLabels, testing_data[0], typicality, agreement, len(trainLabels), False)
     
 # Close output file
 f.close()

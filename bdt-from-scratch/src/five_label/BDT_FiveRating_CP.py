@@ -330,19 +330,24 @@ def getMax(lst):
 # distance to the nearest neighbor with a different class. Cosine similarity
 # will be used to calculate distance. This function will return an array of conformity 
 # measures for every element in the set of cases set in arguments
-def Train_Conformity(training_cases, predicted_calibration):
+
+
+""" input: training cases (features, labels)
+    input: predicted calbibration cases (features, predicted labels)
+    for each calibration case
+        find distance to each training case
+        keeping track of closest same and 
+        closest diff(using predicted label)
+"""
+def Train_Conformity(training_cases, predicted):
     conformity_measures = []
     for i in range(0,len(predicted)): # for each case
         closest_same = sys.maxint
         closest_diff = sys.maxint
-        for j in range(0,len(actual)): # calculate distances to each case
+        for j in range(0,len(training_cases)): # calculate distances to each case
             # calculate the distance to the current case, excluding the class ratings
-            cur_distance = spatial.distance.euclidean(predicted[i][:-4], actual[i][:-4])
-            same = same_class_p(predicted[i], actual[j])
-            print("same: ", same)
-            print("predicted: ", predicted[i])
-            print("actual: ", actual[j])
-            print("distance: ", cur_distance)
+            cur_distance = spatial.distance.euclidean(predicted[i][:-4], training_cases[i][:-4])
+            same = same_class_p(predicted[i], training_cases[j])
             if same and cur_distance < closest_same:
                 closest_same = cur_distance
                 print("changing closest same to: ", closest_same)
@@ -618,9 +623,11 @@ def violin(credibility, confidence, category):
 args = sys.argv[1:]
 print("args: ", args)
 
+global output_type
+
 if len(args) == 0:
-    pignType = None
-    while pign_type != 1 and pignType != 2 and pignType != 3 and pignType != 4:
+    pign_type = None
+    while pign_type != 1 and pign_type != 2 and pign_type != 3 and pign_type != 4:
         pign_type = input("Pignistic Type?\n1.Mean\n2.Median\n3.Mode\n4.Distribution\n\ntype: ")
     
     output_type = None
@@ -642,6 +649,10 @@ elif len(args) == 4:
 else:
     print("arguments to script are [pignisitic type(1-4), output comparison type(1-4), output file name(string), testing/traing(y/n)]")
     sys.exit()
+
+#open the output file
+f = open(f_name, "w")
+
 
 #open the output file
 f = open(f_name, "w")
@@ -702,12 +713,14 @@ for trn_ind, tst_ind in kf:
     print ("Classifying Calibration Set...") 
     for i in range(0,len(calib_features)):
             calibLabels.append(classify(tree, test_header,calib_features[i]))
+
     
     # Compute Calibration Conformity
     print("Computing Calibration Conformity...")
+    print("calib_feature: ", calib_features[0][:-4])#.append(calibLabels[0]))
+    print("train_feature: ", train_features[0][:-4])#.append(actualTrain[0]))
     actualCalib = getPigns(calib_features)
-    calib_conf = Train_Conformity(actualCalib, calibLabels)
-    print("calib_conf:", calib_conf)
+    calib_conf = Train_Conformity([train_features[i][:-4].append(actualTest[i]) for i in range(0,len(train_features))], [calib_features[i][:-4].append(calibLabels[i]) for i in range(0,len(calibLabels))])
     
     # Classify testing set
     print ("Classifying Testing Set...") 

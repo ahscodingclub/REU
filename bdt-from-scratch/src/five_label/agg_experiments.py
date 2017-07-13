@@ -643,8 +643,8 @@ print("args: ", args)
 global output_type
 
 if len(args) == 0:
-    pignType = None
-    while pign_type != 1 and pignType != 2 and pignType != 3 and pignType != 4:
+    pign_type = None
+    while pign_type != 1 and pign_type != 2 and pign_type != 3 and pign_type != 4:
         pign_type = input("Pignistic Type?\n1.Mean\n2.Median\n3.Mode\n4.Distribution\n\ntype: ")
     
     output_type = None
