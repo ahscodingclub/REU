@@ -8,7 +8,14 @@ def getMax(lst):
     if len(mx_vals) == 1:
         return mx_vals[0]
     else:
-        return (sum(mx_vals)/len(mx_vals))
+        return (sum(mx_vals)/len(mx_vals))+1
+
+def getMode(case):
+    counts = [0]*5
+    for vote in case:
+        counts[int(vote)-1]+=1
+    return int(round(getMax(counts))+1)
+
 
 def getMode(case):
     counts = [0]*5
@@ -16,5 +23,6 @@ def getMode(case):
         counts[vote-1]+=1
     return getMax(counts)+1
 
-print(getMode([2,2,3,4]))
-print(getMode([2,3,4,5]))
+print("[2,2,3,4]: ", getMode([2,2,3,4]))
+print("[2,3,4,5]: ", getMode([2,3,4,5]))
+print("[5,5,5,5]: ", getMode([5,5,5,5]))

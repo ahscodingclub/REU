@@ -8,7 +8,7 @@ def getMode(case):
     counts = [0]*5
     for vote in case:
         counts[vote-1]+=1
-    return getMax(counts)+1
+    return round(getMax(counts))+1
 
 def getMax(lst, verbose=False):
     mx = max(lst)
@@ -17,33 +17,19 @@ def getMax(lst, verbose=False):
     for k,x in enumerate(lst):
         if x == mx:
             mx_vals.append(k)
+    print(mx_vals)
     if len(mx_vals) == 1:
         return mx_vals[0]
     else:
-        return (sum(mx_vals)/len(mx_vals))
+        return (sum(mx_vals)/len(mx_vals)) 
 
-start = time.time()
-for i in range(0,50000):
-    mode = int(scipy.stats.mode([2,2,3,4])[0][0])
-stop = time.time()
+mode = int(scipy.stats.mode(np.array([2,3,4,5]))[0][0])
 
-print("process spent: ", float(stop-start))
+print("[3,2,1,4]: ", mode)
 
-start = time.time()
-for i in range(0,50000):
-    mode = int(scipy.stats.mode(np.array([2,2,3,4]))[0][0])
-stop = time.time()
+mode = getMode([2,3,4,5])
 
-print("process spent: ", float(stop-start))
-
-start = time.time()
-for i in range(0,50000):
-  pign = [0]*5
-  mode = getMode([2,2,3,4]) 
-  pign[mode-1] = 1
-stop = time.time()
-
-print("process spent: ", float(stop-start))
+print("[2,3,4,5]: ", mode)
 
 
 

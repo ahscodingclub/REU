@@ -341,26 +341,35 @@ def getMode(case):
     counts = [0]*5
     for vote in case:
         counts[int(vote)-1]+=1
-    return getMax(counts)+1
+    return int(round(getMax(counts))+1)
 
 def getConfusionMatrix(predicted,actual,output_type):
     #mean
     if output_type == 1:
         tst_proba = [int(round(1*case[0]+2*case[1]+3*case[2]+4*case[3]+5*case[4])) for case in predicted]
-        act_proba = [getMax(case)+1 for case in actual]
+        act_proba = [int(round(1*case[0]+2*case[1]+3*case[2]+4*case[3]+5*case[4])) for case in actual]
         conf_mat = confusion_matrix(act_proba,tst_proba, labels=[1,2,3,4,5])
         
     #median
     elif output_type == 2:
         tst_proba = []
+        act_proba = []
         for case in predicted: 
             pred_index = 0
             prob_total = 0
-            while prob_total < .5:
+            while prob_total <= .5:
                 prob_total += case[pred_index]
                 pred_index += 1
             tst_proba.append(pred_index)
-        act_proba = [getMax(case)+1 for case in actual]
+
+        for case in actual: 
+            pred_index = 0
+            prob_total = 0
+            while prob_total <= .5:
+                prob_total += case[pred_index]
+                pred_index += 1
+            act_proba.append(pred_index)
+
         conf_mat = confusion_matrix(act_proba,tst_proba, labels=[1,2,3,4,5])
 
     #mode
@@ -408,35 +417,52 @@ def sum2D(input):
     return sum(map(sum, input))
 
 def getPAActual(predicted):
-  typicality = []
-  agreement = []
+  agg_typicality = [0]*5
+  agg_agreement = [0]*5
   actual = [0,0,0,0,0] * len(predicted)
+  total_predicted_cases = [0]*5
   
   for i in range(0, len(predicted)):
+    #reset csv reader
     csv_f = open(f_name[0:-4] + '_training' + '.csv')
     csv_f = csv.reader(csv_f)
     csv_f.next()
-    typ = 0
-    agg = 0
-    total_cases = 0
+    #get out current predicted testing case
     pred = predicted[i]
-    find_count = 0
+    #incriment the count for cases with this rating
+    total_predicted_cases[pred.index(max(pred))] += 1
+    #set matching cases and find count for every rating to 0
+    total_matching_cases = [0]*5
+    case_typicality = [0]*5
+    case_agreement = [0]*5
+    total_training_cases = 0
     for row in csv_f: 
+      total_training_cases += 1
       train_act = [row[1], row[2], row[3], row[4], row[5]]
       train_act = [float(x) for x in train_act]
       train_pred = [row[6], row[7], row[8], row[9], row[10]]
       train_pred = [float(x) for x in train_pred]
-      total_cases += 1
       if(pred == train_pred):
-        actual[i] = np.add(actual[i], train_act)
-        find_count+=1
-        agg += train_act[getMax(train_pred)-1]
+        total_matching_cases[pred.index(max(pred))]+=1
+        case_agreement[pred.index(max(pred))] += train_act[train_pred.index(max(train_pred))]
+        case_typicality[pred.index(max(pred))] += 1
     
-    actual[i] = np.divide(actual[i], find_count)
-    typicality.append(float(find_count)/total_cases)
-    agreement.append(agg/find_count)
+    for i in range(0,5):
+        if total_matching_cases[i] != 0:
+            case_typicality[i] = float(total_matching_cases[i])/total_training_cases
+            case_agreement[i] /= total_matching_cases[i]
 
-  return typicality, agreement
+    #add the typicality and agreement distribution to the total distribution
+    agg_typicality = np.add(agg_typicality, case_typicality)
+    agg_agreement = np.add(agg_agreement, case_agreement)
+
+  for i in range(0,5):
+    if total_predicted_cases[i] != 0: 
+        agg_agreement[i] /= total_predicted_cases[i]
+        agg_typicality[i] /= total_predicted_cases[i]
+
+  return agg_typicality, agg_agreement
+
 # Calculate Jeffreys Distance of two vectors
 def JeffreyDistance(v1,v2):
     out = 0
@@ -459,7 +485,7 @@ def JeffreyDistance(v1,v2):
 # OUTPUT RESULTS DATAFILES
 #####################################
 def writeData(train_or_test, filename, actual, predicted, confusion, typicality, agreement, id_start,training):
-    
+   
     with open(filename, 'wb') as csvfile:
         writer = csv.writer(csvfile, delimiter=',',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -488,7 +514,7 @@ def writeData(train_or_test, filename, actual, predicted, confusion, typicality,
                 writer.writerow([set_data_array[i+id_start][2],\
                                  actual[i][0], actual[i][1], actual[i][2], actual[i][3], actual[i][4],\
                                  predicted[i][0], predicted[i][1], predicted[i][2], predicted[i][3], predicted[i][4],\
-                                 typicality[i], agreement[i]
+                                 typicality, agreement
                                 ])
 
     # Computing aggregate confidence and credibility
@@ -508,8 +534,8 @@ def writeData(train_or_test, filename, actual, predicted, confusion, typicality,
     print("Accuracy: ", '{:.4f}'.format(float(myAccuracy)), "%", file=f)
     
     if train_or_test == "Testing":
-      print("Typicality: ", np.sum(typicality)/len(typicality), file=f)
-      print("Agreement: ", np.sum(agreement)/len(agreement), file=f)
+      print("Typicality: ", typicality, file=f)
+      print("Agreement: ", agreement, file=f)
          
 #####################################
 # DRAW THE DECISION TREE

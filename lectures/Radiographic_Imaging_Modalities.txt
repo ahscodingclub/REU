@@ -1,0 +1,87 @@
+x-rays were used for tumor treatment within the first year of discovery
+
+Thomas Edison attempted at creating x-rays in a more effiecient way
+
+the dangers of x rays were unknown for a long time, with some in shoe stores
+until the 1950s
+
+for chest radiographs, holding a deep breath is important as it exposes upper and lower lungs
+
+* Generation of beam --> differential attenuation --> grid (image receptor)
+
+a radiographic image is a negative type image, with lighter areas being higher attenuated
+areas, blocing more x-rays
+
+x-ray is not a proper term, it is a radiographic attenuated image
+
+sometimes while radiographing, x-rays are reflected from hitting atoms in the body
+
+the grids mentioned only allow x-rays that are coming in at the correct angle
+
+cool thing to look up: optical density of developed film
+
+35 keV are sent into a tissue of 10cm in height, being width wise half tissue, half bone
+
+aluminum step wedges are used in calibration of radiograph machines
+
+Bremsstrahlung -- breaking radiation -- charged particles may interact through coulumn-force interactions
+to produce radiation 
+
+if a high speed electron orbits close around an atomic nucleus, the electron will change directions, 
+but a tangential photon is flung called a Bremsstahlung photon
+
+a photon is a pure energy, massless particle 
+
+a spectrum of photons will different energy levels are made and flung in different directions
+
+when producing x-rays, a current is ran through a filament, liberating elections. A negatively charged
+cloud of electrons are now attracted to a positively charged anode (target material -- tungsten)
+
+this tungesten is where the Bremsstahlung interactions are occurning, then later focused
+
+* Geomety of X-rays
+
+x-ray beams are not a parallel beams, we can treat uv as parallel because of the distance to the source
+
+x-rays therfore are a diverging beam, leading to some realaties that need to be dealt with
+  intensity differences are based on the inverse square law
+  magnification
+  projection considerations
+
+projection: diverging beams complicate the issue
+
+AP -- anterior --> posterior (front to back)
+
+if non-important parts of the patient are farther from the recepter, than a maginfication of the non-important
+parts will be increased
+
+PA is prefered for chest radiographs, due to the heart being an important organ to check
+
+also, enlarged heart is something that radiologists attempt to evaluate
+
+while looking at a radiograph, radiologists look for any possible complication
+
+there are lead veins in the grid that block angled x-rays from reaching the receptor
+
+** Fluoroscopy
+
+kind of similar to the early days of radiography, getting a real time image
+
+blood flow is a good reason to get a real time x-rays
+
+interventional radiology uses fluoroscopy as its main modality
+
+a device called an image intensifier is used on the receptive end of the image so that 
+less x-rays can be used, however not used for static images due to image obfiscation 
+
+all ranges of B photons and other x-rays must be utilized, with some particles having higher
+penetration power than others, however all must have the same effect on the receptor
+
+**** Image processing
+
+* perception
+  
+A 2d representation of a cube is really 12 lines that are oriented in s way 
+to mimic 3d structures
+
+
