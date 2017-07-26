@@ -417,10 +417,13 @@ def sum2D(input):
     return sum(map(sum, input))
 
 def getPAActual(predicted):
+
+  print("\n\n\n", file=typicality_file)
   agg_typicality = [0]*5
   agg_agreement = [0]*5
   actual = [0,0,0,0,0] * len(predicted)
   total_predicted_cases = [0]*5
+  typicality_list = []
   
   for i in range(0, len(predicted)):
     #reset csv reader
@@ -452,6 +455,9 @@ def getPAActual(predicted):
             case_typicality[i] = float(total_matching_cases[i])/total_training_cases
             case_agreement[i] /= total_matching_cases[i]
 
+    typicality_list.append(np.sum(case_typicality))
+    
+
     #add the typicality and agreement distribution to the total distribution
     agg_typicality = np.add(agg_typicality, case_typicality)
     agg_agreement = np.add(agg_agreement, case_agreement)
@@ -461,7 +467,7 @@ def getPAActual(predicted):
         agg_agreement[i] /= total_predicted_cases[i]
         agg_typicality[i] /= total_predicted_cases[i]
 
-  return agg_typicality, agg_agreement
+  return agg_typicality, agg_agreement, typicality_list
 
 # Calculate Jeffreys Distance of two vectors
 def JeffreyDistance(v1,v2):
@@ -693,6 +699,9 @@ else:
 #open the output file
 f = open(f_name, "w")
 
+global typicality_file
+
+typicality_file=open("typicality_file.txt", "w")
 
 importIdData("../../data/clean/LIDC_809_Complete.csv")
 
@@ -776,15 +785,15 @@ for trn_ind, tst_ind in kf:
     writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0, False)
     
     ## P->A Heuristic (predicted to actual mapping for testing set)
-    typicality, agreement = getPAActual(testLabels)
+    typicality, agreement, typicality_list = getPAActual(testLabels)
     
     conf_matrix = getConfusionMatrix(testLabels, actualTest, output_type)
     accuracy = getAccuracy(conf_matrix)
 
-    testing_data = [test_conf_matrix, test_credibility, test_confidence, classes]
+    testing_data = [test_conf_matrix, test_credibility, test_confidence, classes, typicality_list]
    
     if accuracy > k_best[1]:
-        k_best = [k_round, accuracy, actualTrain, trainLabels, actualTest, testLabels, training_data, testing_data, typicality, agreement]
+        k_best = [k_round, accuracy, actualTrain, trainLabels, actualTest, testLabels, training_data, testing_data, typicality, agreement, typicality_list]
 
     # increase round of k-fold vlaidation
     k_round += 1
@@ -798,6 +807,10 @@ training_data = k_best[6]
 testing_data = k_best[7]
 typicality = k_best[8]
 agreement = k_best[9]
+typicality_list = k_best[10]
+
+for i in typicality_list: 
+    print(i, file=typicality_file)
 
 print ("\nWriting Data for best fold k =", k_best[0], "...\n") 
 
@@ -809,3 +822,4 @@ writeData("Testing", f_name[0:-4] + '_testing' + '.csv', actualTest, testLabels,
     
 # Close output file
 f.close()
+typicality_file.close()
