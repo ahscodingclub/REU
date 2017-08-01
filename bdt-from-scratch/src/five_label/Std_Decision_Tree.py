@@ -85,7 +85,7 @@ def setTrain(trn_data_array):
     calib_features = trn_data_array[split:].tolist() # calibration data
 
 # EXTRACT DATA
-def getPigns(dataset):  
+def getPigns(dataset):
     nodePigns = []
     # For each case at this node, calculate a vector of probabilities
     for case in dataset:
@@ -132,55 +132,36 @@ def getPigns(dataset):
 #####################################
 # CREATING THE BDT
 #####################################
-
-createTree(
+def createTree(train, train_labels):
   clf=DecisionTreeClassifier()
-  train = [[1,1,2,3,4],[2,2,3,4,5]]
-  train_lab = [1,2]
-  test = [[1,2,3,4,5],[2,2,3,4,5]]
-  test_lab = [2,2]
-  clf.fit(train,train_lab)
-  output=clf.predict(test)
-return clf
-
-
-#####################################
-# CLASSIFY NEW CASES
-#####################################
-def classify(inputTree, featLabels, testVec):
-    firstStr = inputTree.keys()[0]
-
-    if (firstStr == 'Leaf'): # IF LEAF NODE, RETURN BBA VECTOR
-        bba = inputTree['Leaf'].values()[0]
-        return bba
-
-    elif (firstStr == 'right' or firstStr == 'left'): # IF RIGHT OR LEFT, RECURSIVE CALL ON SUBTREE OF THAT NODE
-        return classify(inputTree[firstStr],featLabels,testVec)
-
-    else: # key is integer or feature label
-        secondDict = inputTree[firstStr]
-        keys = secondDict.keys()
-        featIndex = featLabels.index(firstStr)
-        if (keys[0] == 'BBA'): # IF key is BBA, CLASSIFY NEXT KEY IN TREE
-            key = keys[1]
-        else:
-            key = keys[0] # KEY IS SPLIT VALUE
-
-        if testVec[featIndex] > key: #IF GREATER THAN GET SUBTREE RIGHT ELSE GET SUBTREE LEFT
-            k = secondDict[key].keys()[0]
-            return classify(secondDict[key][k],featLabels,testVec) # GO RIGHT
-        else: # GET SUBTREE
-            k = secondDict[key].keys()[1]
-            return classify(secondDict[key][k],featLabels,testVec) # GO LEFT
+  clf.fit(train,train_labels)
+  return clf
 
 #####################################
 # EVALUATION METHODS
 #####################################
+def getMean(lst):
+    sum = 0
+    for i in lst:     # Count number of instances of each rating
+        sum += i
+        mean = sum/4
+    return mean
 
-# calculate a confusion matrix given predicted and actual, using full complexity of BBA
-# returns one confusion matrix
-#def getConfusionMatrix(predicted,actual):
-#  return cross_product(predicted,actual)
+def getMedian(case):
+    case.sort()
+    while(len(case) > 2):
+        case = case[1:-1]
+        if len(case) == 1:
+            return case[0]
+        else:
+            return round((float(case[0])+case[1])/2)
+
+def getMode(case):
+    counts = [0]*5
+    for vote in case:
+        counts[int(vote)-1]+=1
+    return int(round(getMax(counts))+1)
+
 def getMax(lst):
     mx = max(lst)
     mx_vals = []
@@ -192,163 +173,6 @@ def getMax(lst):
         return mx_vals[0]
     else:
         return (sum(mx_vals)/len(mx_vals))
-
-def getMedian(case):
-    case.sort()
-    while(len(case) > 2):
-        case = case[1:-1]
-        if len(case) == 1:
-            return case[0]
-        else:
-            return (float(case[0])+case[1])/2
-
-def getMode(case):
-    counts = [0]*5
-    for vote in case:
-        counts[int(vote)-1]+=1
-    return int(round(getMax(counts))+1)
-
-def getConfusionMatrix(predicted,actual,output_type):
-    #mean
-    if output_type == 1:
-        tst_proba = [int(round(1*case[0]+2*case[1]+3*case[2]+4*case[3]+5*case[4])) for case in predicted]
-        act_proba = [int(round(1*case[0]+2*case[1]+3*case[2]+4*case[3]+5*case[4])) for case in actual]
-        conf_mat = confusion_matrix(act_proba,tst_proba, labels=[1,2,3,4,5])
-
-    #median
-    elif output_type == 2:
-        tst_proba = []
-        act_proba = []
-        for case in predicted:
-            pred_index = 0
-            prob_total = 0
-            while prob_total <= .5:
-                prob_total += case[pred_index]
-                pred_index += 1
-            tst_proba.append(pred_index)
-
-        for case in actual:
-            pred_index = 0
-            prob_total = 0
-            while prob_total <= .5:
-                prob_total += case[pred_index]
-                pred_index += 1
-            act_proba.append(pred_index)
-
-        conf_mat = confusion_matrix(act_proba,tst_proba, labels=[1,2,3,4,5])
-
-    #mode
-    elif output_type == 3:
-        tst_proba = [getMax(case)+1 for case in predicted]
-        act_proba = [getMax(case)+1 for case in actual]
-        conf_mat = confusion_matrix(act_proba,tst_proba, labels=[1,2,3,4,5])
-
-    #distribution
-    elif output_type == 4:
-        conf_mat = [[0,0,0,0,0],
-                    [0,0,0,0,0],
-                    [0,0,0,0,0],
-                    [0,0,0,0,0],
-                    [0,0,0,0,0]]
-        for i in range(0,len(predicted)):
-            conf_mat = np.add(conf_mat, cross_product(predicted[i],actual[i]))
-
-    return conf_mat
-
-def cross_product(X,Y):
-    product = [ [ 0 for y in range(len(Y)) ] for x in range(len(X)) ]
-    # iterate through rows of X
-    for i in range(len(X)):
-        # iterate through rows of Y
-        for j in range(len(Y)):
-            product[i][j] += X[i] * Y[j]
-    return product
-
-# Calculate accuracy given a confusion matrix
-# returns accuracy of misclassification matrix
-def getAccuracy(class_matrix):
-    accy = 0.0
-    for j in range(0,5):
-        accy += class_matrix[j][j]
-    return 100 * float(accy) / sum2D(class_matrix)
-
-# Calculate the maximum accuracy that can be achieved from a
-# probabilistic label vector
-def getCredibility(plv):
-    return getAccuracy(cross_product(plv, plv))
-
-# Sum elements in a 2D array
-def sum2D(input):
-    return sum(map(sum, input))
-
-def getPAActual(predicted):
-
-  agg_typicality = [0]*5
-  agg_agreement = [0]*5
-  actual = [0,0,0,0,0] * len(predicted)
-  total_predicted_cases = [0]*5
-
-  for i in range(0, len(predicted)):
-    #reset csv reader
-    csv_f = open(f_name[0:-4] + '_training' + '.csv')
-    csv_f = csv.reader(csv_f)
-    csv_f.next()
-    #get out current predicted testing case
-    pred = predicted[i]
-    #incriment the count for cases with this rating
-    total_predicted_cases[pred.index(max(pred))] += 1
-    #set matching cases and find count for every rating to 0
-    total_matching_cases = [0]*5
-    case_typicality = [0]*5
-    case_agreement = [0]*5
-    total_training_cases = 0
-    for row in csv_f:
-      total_training_cases += 1
-      train_act = [row[1], row[2], row[3], row[4], row[5]]
-      train_act = [float(x) for x in train_act]
-      train_pred = [row[6], row[7], row[8], row[9], row[10]]
-      train_pred = [float(x) for x in train_pred]
-      if(pred == train_pred):
-        total_matching_cases[pred.index(max(pred))]+=1
-        case_agreement[pred.index(max(pred))] += train_act[train_pred.index(max(train_pred))]
-        case_typicality[pred.index(max(pred))] += 1
-
-    for i in range(0,5):
-        if total_matching_cases[i] != 0:
-            case_typicality[i] = float(total_matching_cases[i])/total_training_cases
-            case_agreement[i] /= total_matching_cases[i]
-
-    typicality_list.append(np.sum(case_typicality))
-
-
-    #add the typicality and agreement distribution to the total distribution
-    agg_typicality = np.add(agg_typicality, case_typicality)
-    agg_agreement = np.add(agg_agreement, case_agreement)
-
-  for i in range(0,5):
-    if total_predicted_cases[i] != 0:
-        agg_agreement[i] /= total_predicted_cases[i]
-        agg_typicality[i] /= total_predicted_cases[i]
-
-  return agg_typicality, agg_agreement
-
-# Calculate Jeffreys Distance of two vectors
-def JeffreyDistance(v1,v2):
-    out = 0
-    for i in range(len(v1)):
-        m = (v2[i] + v1[i])/2
-        if m != 0:
-
-            if v1[i] == 0:
-                a = 0
-            else:
-                a = v1[i] * math.log(v1[i]/m)
-            if v2[i] == 0:
-                b = 0
-            else:
-                b = v2[i] * math.log(v2[i]/m)
-            out += (a + b)
-    return out
 
 #####################################
 # OUTPUT RESULTS DATAFILES
@@ -407,123 +231,6 @@ def writeData(train_or_test, filename, actual, predicted, confusion, typicality,
       print("Agreement: ", agreement, file=f)
 
 #####################################
-# DRAW THE DECISION TREE
-#####################################
-
-# IF tree in file is same tree we want, USE IT rather than building it
-def getTrees(tf,head,np,nc,mind,md, switch):
-    param = [np,nc,md]
-    if(switch):
-         with open("../../output/tree.txt","wb") as t:
-            trees = [param,createTree(train_features, header, nparent, nchild, mind, maxdepth)]
-            t.write(trees.__repr__())
-            return trees[1]
-    else:
-        with open("../output/tree.txt","r") as t:
-            tree_file = t.read()
-
-        clear = False
-        trees = []
-        if len(tree_file) != 0 and tree_file.find('\x00') != 0:
-            trees = ast.literal_eval(tree_file)
-            for i in range(3):
-                if trees[0][i] != param[i]: clear = True
-        else:
-            clear = True
-        if clear:
-            with open("../output/tree.txt","wb") as t:
-                trees = [param, createTree(train_features, header, nparent, nchild, mind, maxdepth)]
-                t.write(trees.__repr__())
-        return trees[1]
-
-def draw(parent_name, child_name):
-    edge = pydot.Edge(str(parent_name), str(child_name))
-    graph.add_edge(edge)
-
-def visit(node, parent=None):
-    print (node)
-    for k,v in node.iteritems():
-        if isinstance(v, dict) and k != 'BBA' and ~isinstance(k, float):
-            # We start with the root node whose parent is None
-            # we don't want to graph the None node
-            if parent:
-                draw(parent, k)
-            visit(v, k)
-        elif isinstance(k, float):
-            print ("Split found at value ",v)
-            return
-        elif  k == 'BBA':
-            print ("BBA found: ",v)
-            return
-        else:
-            draw(parent, k)
-            # drawing the label using a distinct name
-            draw(k, k+'_'+v)
-
-# PLOT EACH VIOLIN PLOT
-def plotVio(old, category, a, axes, xlabel, ylabel, title):
-    new = []
-    labels = []
-
-    for cat in category:
-        if (cat not in labels):
-            new.append([])
-            labels.append(cat)
-    labels = sorted(labels)
-
-    # Sort category values into new by label
-    for x in range (len(old)):
-        new[labels.index(category[x])].append(old[x])
-
-    # Plot the information
-    nans = np.array([float('nan'), float('nan')])
-    try:
-        axes[a].violinplot([val or nans for val in new], showmeans=True, showmedians=False)
-    except ValueError as e:  #raised if `y` is empty.
-        print (e)
-        pass
-
-    axes[a].set_title(title)
-    axes[a].yaxis.grid(True)
-    if(title[:9] != "Aggregate"):
-        axes[a].set_xticks([y+1 for y in range(0,len(new))])
-        axes[a].set_xticklabels(labels)
-    else:
-        axes[a].tick_params(axis='x',which='both',bottom='off',top='off',labelbottom='off')
-    axes[a].set_xlabel(xlabel)
-    axes[a].set_ylabel(ylabel)
-    axes[a].set_ylim([0,102])
-
-# DRAW VIOLIN PLOTS FOR CONFIDENCE / CREDIBILITY
-def violin(credibility, confidence, category):
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
-
-    # Confidence
-    plotVio(confidence, category, 0, axes,  'Classification of Malignancy', 'Confidence', 'Confidence Values at Each Classification')
-
-    # Credibility
-    plotVio(credibility, category, 1, axes, 'Classification of Malignancy', 'Credibility', 'Credibilty Values at Each Classification')
-
-    # Save figure
-    figure_dest = f_name[0:-4] + '_classes.png'
-    plt.savefig(figure_dest, bbox_inches='tight')
-    print("Figure saved in ", figure_dest)
-
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
-
-    # Confidence
-    plotVio(confidence, [1]*len(category), 0, axes,  'Density of Values', 'Confidence', 'Aggregate Confidence Values of Classifications')
-
-    # Credibility
-    plotVio(credibility, [1]*len(category), 1, axes, 'Density of Values', 'Credibility', 'Aggregate Credibility Values of Classifications')
-    # Save figure
-
-    figure_dest = f_name[0:-4]+'_aggregate.png'
-    plt.savefig(figure_dest, bbox_inches='tight')
-    print("Figure saved in ", figure_dest)
-
-
-#####################################
 # MAIN SCRIPT: Build, Classify, Output
 #####################################
 # Setup
@@ -537,11 +244,7 @@ global output_type
 if len(args) == 0:
     pign_type = None
     while pign_type != 1 and pign_type != 2 and pign_type != 3 and pign_type != 4:
-        pign_type = int(input("\n\nPignistic Type?\n1.Mean\n2.Median\n3.Mode\n4.Distribution\n\ntype: "))
-
-    output_type = None
-    while output_type != 1 and output_type != 2 and output_type != 3 and output_type != 4:
-        output_type = input("\n\nOutput Type?\n1.Mean\n2.Median\n3.Mode\n4.Distribution\n\ntype: ")
+        pign_type = int(input("\n\nPignistic Type?\n1.Mean\n2.Median\n3.Mode\n\ntype: "))
 
     # file output settings
     f_name = raw_input("\n\nfile for confusion matrix: ")
@@ -550,13 +253,14 @@ if len(args) == 0:
     var_set = None
     while var_set != "y" and var_set != "n":
         var_set = raw_input("\n\ntesting?(y/n): ")
-elif len(args) == 4:
+
+elif len(args) == 3:
     pign_type = int(args[0])
     output_type = int(args[1])
     f_name = args[2]
     var_set = args[3]
 else:
-    print("arguments to script are [pignisitic type(1-4), output comparison type(1-4), output file name(string), testing/traing(y/n)]")
+    print("arguments to script are [pignisitic type(1-4), output file name(string), testing/traing(y/n)]")
     sys.exit()
 
 #open the output file
@@ -586,14 +290,7 @@ kf = KFold(len(LIDC_Data), kfolds)
 k_round = 1
 k_best = [None]*7
 
-trainhead = "Training Data: (d = " + str(maxdepth) + " | np = " + str(nparent) + " | nc = " + str(nchild) + " | k = " + str(kfolds) + ")"
-
-testhead = "Testing Data: (d = " + str(maxdepth) + " | np = " + str(nparent) + " | nc = " + str(nchild) + " | k = " + str(kfolds) + ")"
-
-print("Classifying with BDT Parameters (d = ",maxdepth,", np = ",nparent,", nc = ",nchild,", k = ",kfolds,"):\n",file=f)
-
 global graph
-
 global typicality_list
 global id_list
 
@@ -624,53 +321,52 @@ for trn_ind, tst_ind in kf:
     print("#################################")
     print("Train Size: ", len(train_features))
     print("Test Size: ", len(test_features))
-    print ("Building Belief Decision Tree...")
+    print ("Building Decision Tree...")
 
     # Create Tree
     # setting "switch = True" will make new tree each time
-    tree = getTrees(train_features, header, nparent, nchild, 0, maxdepth, True)
+    train_labels = []
+    for i in range(0, len(train_features)):
+        votes = [int(x) for x in train_features[i][-4:]]
+        if pign_type == 1:
+            label = getMean(votes)
+        elif pign_type == 2:
+            label = getMedian(votes)
+        elif pign_type == 3:
+            label = getMode(votes)
+        train_labels.append(label)
+        train_features[i] = train_features[i][:-4]
+    tree = createTree(train_features, train_labels)
 
-    #graphing the tree
-#    graph = pydot.Dot(graph_type='graph')
-#    visit(tree)
-#    graph.write_png("BDT.png")
+    for i in range(0, len(test_features)):
+        votes = [int(x) for x in test_features[i][-4:]]
+        if pign_type == 1:
+            label = getMean(votes)
+        elif pign_type == 2:
+            label = getMedian(votes)
+        elif pign_type == 3:
+            label = getMode(votes)
+        test_labels.append(label)
+        test_features[i] = test_features[i][:-4]
 
     # Classify training set
     print ("Classifying Training Set...")
-    for i in range(0,len(train_features)):
-            trainLabels.append(classify(tree, test_header,train_features[i]))
+    train_labels.append(classify(tree, test_header,train_features[i]))
 
    # Classify testing set
     print ("Classifying Testing Set...")
-    for i in range(0,len(test_features)):
-            testLabels.append(classify(tree, test_header,test_features[i]))
-
-    classes = [testlabel.index(max(testlabel))+1 for testlabel in testLabels]
+    test_predicted = tree.predict(test_features)
 
     # Save training metrics
     train_conf_matrix = []
-    train_credibility = []
-    train_confidence = []
-
-    # Save testing metrics
-    test_conf_matrix = []
-    test_credibility = []
     test_confidence = []
 
-    training_data = [train_conf_matrix, train_credibility, train_confidence, classes]
+    confusion_matrix(test_labels, test_predicted)
+    print accuracy_score(test_lab,output)
 
-    writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0, False)
-
-    ## P->A Heuristic (predicted to actual mapping for testing set)
-    typicality, agreement = getPAActual(testLabels)
-
-    conf_matrix = getConfusionMatrix(testLabels, actualTest, output_type)
-    accuracy = getAccuracy(conf_matrix)
-
-    testing_data = [test_conf_matrix, test_credibility, test_confidence, classes]
 
     if accuracy > k_best[1]:
-        k_best = [k_round, accuracy, actualTrain, trainLabels, actualTest, testLabels, training_data, testing_data, typicality, agreement]
+        k_best = [k_round, accuracy, actualTrain, trainLabels, actualTest, testLabels, train_conf_matrix, test_conf_matrix, typicality, agreement]
 
     # increase round of k-fold vlaidation
     k_round += 1
