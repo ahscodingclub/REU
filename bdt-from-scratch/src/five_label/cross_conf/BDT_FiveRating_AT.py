@@ -452,7 +452,7 @@ def getPAActual(predicted):
         if total_matching_cases[i] != 0:
             case_typicality[i] = float(total_matching_cases[i])/total_training_cases
             case_agreement[i] /= total_matching_cases[i]
-    
+
     typicality_list.append(np.sum(case_typicality))
     
 
@@ -465,7 +465,7 @@ def getPAActual(predicted):
         agg_agreement[i] /= total_predicted_cases[i]
         agg_typicality[i] /= total_predicted_cases[i]
 
-  return agg_typicality, agg_agreement
+  return agg_typicality, agg_agreement, typicality_list
 
 # Calculate Jeffreys Distance of two vectors
 def JeffreyDistance(v1,v2):
@@ -672,19 +672,19 @@ global output_type
 if len(args) == 0:
     pign_type = None
     while pign_type != 1 and pign_type != 2 and pign_type != 3 and pign_type != 4:
-        pign_type = int(input("\n\nPignistic Type?\n1.Mean\n2.Median\n3.Mode\n4.Distribution\n\ntype: "))
+        pign_type = input("Pignistic Type?\n1.Mean\n2.Median\n3.Mode\n4.Distribution\n\ntype: ")
     
     output_type = None
     while output_type != 1 and output_type != 2 and output_type != 3 and output_type != 4:
-        output_type = input("\n\nOutput Type?\n1.Mean\n2.Median\n3.Mode\n4.Distribution\n\ntype: ")
+        pign_type = input("Pignistic Type?\n1.Mean\n2.Median\n3.Mode\n4.Distribution\n\ntype: ")
     
     # file output settings
-    f_name = raw_input("\n\nfile for confusion matrix: ") 
+    f_name = raw_input("file for confusion matrix: ") 
     
     #input loop for variable settings
     var_set = None
     while var_set != "y" and var_set != "n":
-        var_set = raw_input("\n\ntesting?(y/n): ")
+        var_set = raw_input("testing?(y/n): ")
 elif len(args) == 4:
     pign_type = int(args[0])
     output_type = int(args[1])
@@ -730,25 +730,14 @@ print("Classifying with BDT Parameters (d = ",maxdepth,", np = ",nparent,", nc =
 global graph
 
 global typicality_list
-global id_list
 
 typicality_list = []
-id_list = []
-
-"""
-manually setting kfolds so every case is tested
-if var_set == "n":
-  kf = [[[range(142,850)],[range(0,142)]],[[range(0,142),range(284,850)],[range(142,284)]],[[range(0,284),range(426,850)],[range(284,426)]],[[range(0,426), range(568,850)],[range(426,568)]],[[range(0,568), range(710,850)],[range(568,710)]],[[range(0,710)],[range(710,850)]] ]
-"""
 
 for trn_ind, tst_ind in kf:
     trainLabels = []
     testLabels = []
     setTrain(LIDC_Data[trn_ind])
     test_features = LIDC_Data[tst_ind].tolist()
-    for i in range(0, len(test_features)): 
-      id_list.append(test_features[i][0])
-      test_features[i] = test_features[i][1:] 
 
     # Get actual data
     actualTrain = getPigns(train_features)
@@ -780,6 +769,7 @@ for trn_ind, tst_ind in kf:
     for i in range(0,len(test_features)):
             testLabels.append(classify(tree, test_header,test_features[i]))
 
+
     classes = [testlabel.index(max(testlabel))+1 for testlabel in testLabels] 
 
     # Save training metrics
@@ -802,7 +792,7 @@ for trn_ind, tst_ind in kf:
     conf_matrix = getConfusionMatrix(testLabels, actualTest, output_type)
     accuracy = getAccuracy(conf_matrix)
 
-    testing_data = [test_conf_matrix, test_credibility, test_confidence, classes]
+    testing_data = [test_conf_matrix, test_credibility, test_confidence, classes, typicality_list]
    
     if accuracy > k_best[1]:
         k_best = [k_round, accuracy, actualTrain, trainLabels, actualTest, testLabels, training_data, testing_data, typicality, agreement]
@@ -820,8 +810,8 @@ testing_data = k_best[7]
 typicality = k_best[8]
 agreement = k_best[9]
 
-for i in range(0,len(typicality_list)): 
-    print(id_list[i], ", ", typicality_list[i], file=typicality_file)
+for i in typicality_list: 
+    print(i, file=typicality_file)
 
 print ("\nWriting Data for best fold k =", k_best[0], "...\n") 
 

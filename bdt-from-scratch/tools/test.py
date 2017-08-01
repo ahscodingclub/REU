@@ -1,35 +1,34 @@
-from scipy import stats
-import scipy
+import matplotlib.pyplot as plt
 import numpy as np
-import time
-import math
 
-def getMode(case):
-    counts = [0]*5
-    for vote in case:
-        counts[vote-1]+=1
-    return round(getMax(counts))+1
+data_a = [[1,2,5], [5,7,2,2,5], [7,2,5]]
+data_b = [[6,4,2], [1,2,5,3,2], [2,3,5,1]]
 
-def getMax(lst, verbose=False):
-    mx = max(lst)
-    mx_vals = []
-    
-    for k,x in enumerate(lst):
-        if x == mx:
-            mx_vals.append(k)
-    print(mx_vals)
-    if len(mx_vals) == 1:
-        return mx_vals[0]
-    else:
-        return (sum(mx_vals)/len(mx_vals)) 
+mu = [3.93, 7.761, 14.319]
+alpha = [0.9996197532958419, 0.9702573729698682, 0.9375845650647818]
+ticks = ['A', 'B', 'C']
 
-mode = int(scipy.stats.mode(np.array([2,3,4,5]))[0][0])
+def set_box_color(bp, color):
+    plt.setp(bp['boxes'], color=color)
+    plt.setp(bp['whiskers'], color=color)
+    plt.setp(bp['caps'], color=color)
+    plt.setp(bp['medians'], color=color)
 
-print("[3,2,1,4]: ", mode)
+plt.figure()
 
-mode = getMode([2,3,4,5])
+bpl = plt.boxplot(data_a, positions=np.array(xrange(len(data_a)))*2.0-0.4, sym='', widths=0.6)
+bpr = plt.boxplot(data_b, positions=np.array(xrange(len(data_b)))*2.0+0.4, sym='', widths=0.6)
+set_box_color(bpl, '#D7191C') # colors are from http://colorbrewer2.org/
+set_box_color(bpr, '#2C7BB6')
 
-print("[2,3,4,5]: ", mode)
+# draw temporary red and blue lines and use them to create a legend
+plt.plot([], c='#D7191C', label='Apples')
+plt.plot([], c='#2C7BB6', label='Oranges')
+plt.legend()
 
+plt.xticks(xrange(0, len(ticks) * 2, 2), ticks)
+plt.xlim(-2, len(ticks)*2)
+plt.ylim(0, 8)
+plt.tight_layout()
 
-
+plt.savefig('figure.png')

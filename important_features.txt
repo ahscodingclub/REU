@@ -1,0 +1,29 @@
+35 gabormean_0_2               
+25 IntensityDifference
+18 MaxIntensity
+20 SDIntensity
+9 Compactness
+26 markov1
+22 MaxIntensityBG
+24 SDIntensityBG
+13 Circularity
+
+gabormean_1_0
+MaxIntensityBG
+markov3
+gaborSD_3_0
+Compactness
+Homogeneity
+SDIntensityBG
+gabormean_3_2
+gaborSD_2_1
+Area
+MinIntensityBG
+gaborSD_3_1
+MeanIntensityBG
+Roughness
+Energy
+Clustertendency
+Circularity
+Contrast
+MinorAxisLength
