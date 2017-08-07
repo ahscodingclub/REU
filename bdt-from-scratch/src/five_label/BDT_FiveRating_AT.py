@@ -344,8 +344,6 @@ def getMode(case):
     return int(round(getMax(counts))+1)
 
 def getConfusionMatrix(predicted,actual,output_type):
-    print("predicted: ", predicted[0])
-    print("actual: ", actual[0])
     #mean
     if output_type == 1:
         tst_proba = [int(round(1*case[0]+2*case[1]+3*case[2]+4*case[3]+5*case[4])) for case in predicted]
@@ -737,12 +735,6 @@ global id_list
 typicality_list = []
 id_list = []
 
-"""
-manually setting kfolds so every case is tested
-if var_set == "n":
-  kf = [[[range(142,850)],[range(0,142)]],[[range(0,142),range(284,850)],[range(142,284)]],[[range(0,284),range(426,850)],[range(284,426)]],[[range(0,426), range(568,850)],[range(426,568)]],[[range(0,568), range(710,850)],[range(568,710)]],[[range(0,710)],[range(710,850)]] ]
-"""
-
 for trn_ind, tst_ind in kf:
     trainLabels = []
     testLabels = []
@@ -824,15 +816,17 @@ agreement = k_best[9]
 
 for i in range(0,len(typicality_list)):
     print(id_list[i], ", ", typicality_list[i], file=typicality_file)
+print(len(set(id_list)), file=typicality_file)
 
 print ("\nWriting Data for best fold k =", k_best[0], "...\n")
 
-# write training data
+# write training dataprint(len(set(id_list), file=typicality_file)
 writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0, False)
 
 # write testing data
 writeData("Testing", f_name[0:-4] + '_testing' + '.csv', actualTest, testLabels, testing_data[0], typicality, agreement, len(trainLabels), False)
 
+print("unique cases: ", len(set(id_list)), file=f)
 # Close output file
 f.close()
 typicality_file.close()

@@ -44,6 +44,7 @@ import csv # Read and write csv files
 import time # for testing purposes
 import copy
 from sklearn.metrics import confusion_matrix # Assess misclassification
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import ast
 import sys
@@ -77,11 +78,11 @@ def importAllData(set_name):
 
 ## SET TRAINING DATA
 def setTrain(trn_data_array):
-    global train_features
+    global train_cases
     global calib_features
 
     split = int((6.0/7.0) * len(trn_data_array))
-    train_features = trn_data_array[:split].tolist() # training data
+    train_cases = trn_data_array[:split].tolist() # training data
     calib_features = trn_data_array[split:].tolist() # calibration data
 
 # EXTRACT DATA
@@ -132,22 +133,25 @@ def getPigns(dataset):
 #####################################
 # CREATING THE BDT
 #####################################
-def createTree(train, train_labels):
+def createTree(train, train_predicted):
     clf=DecisionTreeClassifier(criterion = "entropy", splitter="best", min_samples_leaf=12)
     clf.classes = [1,2,3,4,5]
     print("classes: ", clf.classes)
-    clf.fit(train,train_labels)
+    clf.fit(train,train_predicted)
     return clf
 
 #####################################
 # EVALUATION METHODS
 #####################################
-def getMean(lst):
-    sum = 0
-    for i in lst:     # Count number of instances of each rating
-        sum += i
-        mean = sum/4
-    return mean
+def getActualLabel(actual):
+    if pign_type == 1:
+        labels = getMean(actual)
+    elif pign_type == 2:
+        labels = getMedian(actual)
+    elif pign_type == 3:
+        labels = getMode(actual)
+    return labels
+
 
 def getMedian(case):
     case.sort()
@@ -175,6 +179,35 @@ def getMax(lst):
         return mx_vals[0]
     else:
         return (sum(mx_vals)/len(mx_vals))
+
+def getMean(lst):
+    sum = 0
+    for i in lst:     # Count number of instances of each rating
+        sum += i
+        mean = sum/4
+    return mean
+
+def getPredictedLabels(predicted):
+    #mean
+    if pign_type == 1:
+        labels = [int(round(1*case[0]+2*case[1]+3*case[2]+4*case[3]+5*case[4])) for case in predicted]
+
+    #median
+    elif pign_type == 2:
+        labels = []
+        for case in predicted:
+            pred_index = 0
+            prob_total = 0
+            while prob_total <= .5:
+                prob_total += case[pred_index]
+                pred_index += 1
+            labels.append(int(round(pred_index)))
+
+    #mode
+    elif pign_type == 3:
+        labels = [int(round(getMax(case)+1)) for case in predicted]
+
+    return labels
 
 #####################################
 # MAIN SCRIPT: Build, Classify, Output
@@ -213,7 +246,6 @@ f = open(f_name, "w")
 
 importIdData("../../data/clean/LIDC_809_Complete.csv")
 
-kfolds = 6
 nparent = 24
 nchild = 12
 maxdepth = 25
@@ -223,110 +255,65 @@ if(var_set == "n"):
 elif(var_set == "y"):
     importAllData("../../data/modeBalanced/testing_file.csv")
 
-###### K-FOLD VALIDATION ######
-kf = KFold(len(LIDC_Data), kfolds)
+all_data = LIDC_Data.tolist()
 
-k_round = 1
-k_best = [None]*7
+#splitting data
+train_cases, test_cases = train_test_split(all_data, test_size=0.3, random_state=42)
 
-global graph
-global typicality_list
 global id_list
 
-typicality_list = []
 id_list = []
 
-"""
-manually setting kfolds so every case is tested
-if var_set == "n":
-  kf = [[[range(142,850)],[range(0,142)]],[[range(0,142),range(284,850)],[range(142,284)]],[[range(0,284),range(426,850)],[range(284,426)]],[[range(0,426), range(568,850)],[range(426,568)]],[[range(0,568), range(710,850)],[range(568,710)]],[[range(0,710)],[range(710,850)]] ]
-"""
+all_data = LIDC_Data.tolist()
 
+#splitting data
+train_cases, test_cases = train_test_split(all_data, test_size=0.3, random_state=42)
 
-for trn_ind, tst_ind in kf:
-    trainLabels = []
-    testLabels = []
-    setTrain(LIDC_Data[trn_ind])
-    test_features = LIDC_Data[tst_ind].tolist()
-    for i in range(0, len(test_features)):
-      id_list.append(test_features[i][0])
-      test_features[i] = test_features[i][1:]
+for i in range(0, len(train_cases)):
+    id_list.append(train_cases[i][0])
+    train_cases[i] = train_cases[i][1:]
 
-    for i in range(0, len(train_features)):
-        train_features[i] = train_features[i][1:]
+for i in range(0, len(test_cases)):
+    id_list.append(test_cases[0])
+    test_cases[i] = test_cases[i][1:]
 
-    # Console Output
-    print("\n K-FOLD VALIDATION ROUND ",k_round," OF ",kfolds)
-    print("#################################")
-    print("Train Size: ", len(train_features))
-    print("Test Size: ", len(test_features))
-    print ("Building Decision Tree...")
+train_actual = []
+train_predicted = []
+test_actual = []
+test_predicted = []
 
-    # Create Tree
-    # setting "switch = True" will make new tree each time
-    train_labels = []
-    test_labels = []
+train_actual = [int(getActualLabel(x[-4:])) for x in train_cases]
+test_actual = [int(getActualLabel(x[-4:])) for x in test_cases]
 
-    for i in range(0, len(train_features)):
-        votes = [int(x) for x in train_features[i][-4:]]
-        if pign_type == 1:
-            label = getMean(votes)
-        elif pign_type == 2:
-            label = getMedian(votes)
-        elif pign_type == 3:
-            label = getMode(votes)
-        train_labels.append(label)
-        train_features[i] = train_features[i][:-4]
+# Console Output
+print("#################################")
+print("Train Size: ", len(train_cases))
+print("Test Size: ", len(test_cases))
+print ("Building Belief Decision Tree...")
 
-    tree = createTree(train_features, train_labels)
+train_features = [x[:-4] for x in train_cases]
+test_features = [x[:-4] for x in test_cases]
 
+tree = createTree(train_cases, train_actual)
 
+print ("Classifying Training Set...")
+train_predicted = tree.predict(train_cases)
 
-    for i in range(0, len(test_features)):
-        votes = [int(x) for x in test_features[i][-4:]]
-        if pign_type == 1:
-            label = getMean(votes)
-        elif pign_type == 2:
-            label = getMedian(votes)
-        elif pign_type == 3:
-            label = getMode(votes)
-        test_labels.append(label)
-        test_features[i] = test_features[i][:-4]
+print(confusion_matrix(train_predicted, train_predicted, [1,2,3,4,5]))
+print("accuracy: ", accuracy_score(train_predicted,train_predicted))
 
-    print(train_labels)
-    print(test_labels)
+# Classify testing set
+print ("Classifying Testing Set...")
+test_predicted = tree.predict(test_cases)
 
-    print ("Classifying Training Set...")
-    train_predicted = tree.predict(copy.deepcopy(train_features))
-
-    print(train_predicted)
-
-    print(confusion_matrix(train_labels, train_predicted, [1,2,3,4,5]))
-    print("accuracy: ", accuracy_score(train_labels,train_predicted))
-
-   # Classify testing set
-    print ("Classifying Testing Set...")
-    test_predicted = tree.predict(test_features)
-
-    conf_mat = confusion_matrix(test_labels, test_predicted, [1,2,3,4,5])
-    accuracy = accuracy_score(test_labels,test_predicted)
-
-    if accuracy > k_best[1]:
-        k_best = [k_round, accuracy, conf_mat]
-
-    # increase round of k-fold vlaidation
-    k_round += 1
-
-# Output data to text files
-accuracy = k_best[1]
-conf_mat = k_best[2]
-
-print ("\nWriting Data for best fold k =", k_best[0], "...\n")
+conf_mat = confusion_matrix(test_actual, test_predicted, [1,2,3,4,5])
+accuracy = accuracy_score(test_actual,test_predicted)
 
 # write training data
 print("confusion matrix: \n", conf_mat, file=f)
 print("accuracy: \n", accuracy, file=f)
-print("unique cases: ", len(set(id_list)), file=f)
+print("\n\ntest_act: ", test_actual, file=f)
+#print("unique cases: ", len(set(id_list)), file=f)
 
 # Close output file
 f.close()
