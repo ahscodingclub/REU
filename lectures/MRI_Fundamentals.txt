@@ -1,0 +1,65 @@
+Core idea behind tomographic imaging -- differnt views are taken from varying perspectives and
+  reconstructed to provide an overall view of the scanning object
+
+In MRI we are interested in materials with magnetic resonance, such as water filled tissue, 
+  however bone does not have any magnetic resonance 
+
+protons (singular proton in a hydrogen atom) act as a positively charge needles
+
+during MRI aquasition, a magnetic field is applied to a patient, aligning all the 
+  protons in the body, then an rf pulse tips the spinning protons out of alignments, 
+  causing the spinning protons to oscilate, which in turn produces and rf signal 
+  which can be measures
+
+stationary magnet produces a constant magnetic field, which is always on due to the complications
+  of shutting down the liquid nitrogen cooled super magnet
+
+The field is denoted as B-naught 
+
+two posibilities of alignment could occur, being a low energy state of natural magnetic alignment 
+  and a high engergy quasi-stable state or non-natural state 
+
+the net matgnitization M-naught is resultant of 3 more parts per million protons being at a low energy 
+  state than a high energy state, allowing for a small net magnitization
+
+An mri scanner is very long to allow for a uniform magnetic field at the anatomic site of imaging
+
+the frequency that a spinning mass of charge precesses in a magnetic field is denoted as f-naught
+
+the aggregate frequency of precession is denoted as M
+
+Q: why is this processing occuring
+
+applying a force at the same frequency of precession at the same point in the precession arc
+on every rotation will open the cone of procession, making it more obtuse
+
+radio waves are analguous to the string pulling the gyroscope at the same point in the precession
+  route
+
+M-naught is the actual magnetic vector, with M being the magnitude, which is what we 
+  are manipulating
+
+Q: what is this magnetic precession? is the precessing just an analogy to gravity or
+  is the magnetic precession actually a paricle oscilating
+
+a gradient magnet varying in intensity is applied to detect different materials and 
+  amount of materials at different locations due to different resonance frequencies
+  at different levels of magnetic field intensity (Tesla)
+
+you know where the water is located due to the frequency that it is resonating at and
+  relating it to the strength of the field at that point
+
+z-plane -- longitudinal dimension
+x-y plane -- transverse plain
+
+the transmission coil is orthogonal to the detection coil, and they are not on at the same time, 
+  however once the transmission coil is turned off, the M vector wants to return to the steady state
+  with 0 amplitude
+
+amplitude of frequency can be 0, however procession is occuring still at the laramore rate
+
+free induction decay 
+
+T1 - relaxation rate, the rate at which the amplitute returns to 0 
+
+

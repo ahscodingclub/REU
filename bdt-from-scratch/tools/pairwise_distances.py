@@ -1,32 +1,54 @@
 from scipy.spatial import distance
+import matplotlib.pyplot as plt
+from decimal import Decimal
 import numpy as np
-import csv 
+import csv
 
+def remove_dups(l):
+    prev = l[0][0]
+    to_del = []
+    for i in range(1,len(l)):
+        if l[i][0] == prev:
+            to_del.append(i-len(to_del))
+        else:
+            prev = l[i][0]
+
+    for i in to_del:
+        del l[i]
+    return l
+
+#######################
+#Main Script
+#######################
 f = open("../data/modeBalanced/ModeBalanced_170_LIDC_809_Random.csv", 'r')
-g = open("output.txt", 'w')
+g = open("output.csv", 'w')
 
-csv_f = csv.reader(f, delimiter='\t')
+csv_in = csv.reader(f, delimiter=',')
+csv_out = csv.writer(g, delimiter=',')
 #skip the header row
-csv_f.next() 
+row = next(csv_in)
+# print("Circularity ",  row[13])
+# print("Compactness: ",  row[9])
+# print("Gabormean_0_2: ",  row[35])
+# print("Intensity_difference: ",  row[25])
+# print("Markov_1: ",  row[26])
+# print("Max_Intensity: ",  row[18])
+# print("Max_Intensity_BG: ",  row[22])
+# print("SD_Intensity: ",  row[20])
 
-"""
-first run through of the file will save all of the 
-information on the nodules of low typicality
-
-second run will calculate the distance from every 
-previously saved nodule to every other nodule
-"""
 nodule_ids = [6]
 atyp_nodules = []
 all_nodules = []
-distances = [0]*len(nodule_ids)
+distances = []
 
-for row in csv_f: 
-    atyp = False 
+#saving all nodules, and saving atypical
+#nodules in a seperate list as well
+for row in csv_in:
+    atyp = False
     nod = []
 
     for x in row:
-        try: 
+        try:
             var = float(x)
         except:
             var = 0
@@ -36,28 +58,40 @@ for row in csv_f:
         if nod[0] == nod_id:
             atyp = True
 
+    nod = [nod[0], nod[9], nod[18], nod[20], nod[22], nod[25], nod[26], nod[35]]
     all_nodules.append(nod)
 
     if atyp:
         atyp_nodules.append(nod)
 
-for nod in all_nodules:
-    for i in range(0, len(nodule_ids)):
-        distances[i] = np.add(distances[i], distance.euclidean(nod,atyp_nodules[i]))
+#filter out unimportant features
+"""
+Compactness: 9
+Circularity: 13Max_Intensity: 18
+SD_Intensity: 20
+Max_Intensity_BG: 22
+Intensity_difference: 25
+Markov_1: 26
+Gabormean_0_2: 35
+"""
 
 
-for i in range(0, len(nodule_ids)):
-    print("id: ", nodule_ids[i], " , sum of distances: ", distances[i])
+for i in range(0, len(all_nodules)):
+    distances.append(0)
+    for nod in all_nodules:
+        distances[i] = np.add(distances[i], distance.euclidean(nod,all_nodules[i]))
 
-#now need to calculate distances from every other nodule to every nodule, 
-#for now I will probably take an average to see where the atypical cases fall
-#in regards to the average
-distances = []
+nodules = [[all_nodules[i][0], distances[i]] for i in range(0, len(all_nodules))]
 
-for nod_1 in all_nodules:
-  for nod_2 in all_nodules:
-    distances.append(distance.euclidean(nod_1,nod_2))
+#sorting nodules by id
+nodules.sort(key=lambda x: x[0])
+#removing duplicates
+nodules = remove_dups(nodules)
+
+csv_out.writerow(["ID", "Distances"])
+for i in range(0, len(nodules)):
+    csv_out.writerow([nodules[i][0], "{:.2E}".format(Decimal(nodules[i][1]))])
 
 avg = np.sum(distances)/len(distances)
 
-print("average: ", avg)
+csv_out.writerow(["average: ", '%.2E' % Decimal(avg), "min: ", '%.2E' % Decimal(min(distances)), "max: ", '%.2E' % Decimal(max(distances))])

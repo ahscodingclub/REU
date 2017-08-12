@@ -423,12 +423,13 @@ def getPAActual(predicted):
   actual = [0,0,0,0,0] * len(predicted)
   total_predicted_cases = [0]*5
 
+  #for the typicality of each case
   for i in range(0, len(predicted)):
     #reset csv reader
     csv_f = open(f_name[0:-4] + '_training' + '.csv')
     csv_f = csv.reader(csv_f)
     csv_f.next()
-    #get out current predicted testing case
+    #get current predicted testing case
     pred = predicted[i]
     #incriment the count for cases with this rating
     total_predicted_cases[pred.index(max(pred))] += 1
@@ -446,15 +447,13 @@ def getPAActual(predicted):
       if(pred == train_pred):
         total_matching_cases[pred.index(max(pred))]+=1
         case_agreement[pred.index(max(pred))] += train_act[train_pred.index(max(train_pred))]
-        case_typicality[pred.index(max(pred))] += 1
 
     for i in range(0,5):
         if total_matching_cases[i] != 0:
-            case_typicality[i] = float(total_matching_cases[i])/total_training_cases
+            case_typicality[i] = float(total_matching_cases[i])/float(total_training_cases)
             case_agreement[i] /= total_matching_cases[i]
 
     typicality_list.append(np.sum(case_typicality))
-
 
     #add the typicality and agreement distribution to the total distribution
     agg_typicality = np.add(agg_typicality, case_typicality)
@@ -496,8 +495,8 @@ def writeData(train_or_test, filename, actual, predicted, confusion, typicality,
         if train_or_test == "Training":
             writer.writerow(['Nodule ID',\
                              'Actual [1]',      'Actual [2]',       'Actual [3]',       'Actual [4]',       'Actual [5]',\
-                             'Predicted [1]' ,  'Predicted [2]',    'Predicted [3]',    'Predicted [4]',    'Predicted [5]',\
-                             'Confidence', 'Credibility'])
+                             'Predicted [1]' ,  'Predicted [2]',    'Predicted [3]',    'Predicted [4]',    'Predicted [5]',
+                            ])
         else:
             writer.writerow(['Nodule ID',\
                              'Actual [1]',      'Actual [2]',       'Actual [3]',       'Actual [4]',       'Actual [5]',\
@@ -509,37 +508,37 @@ def writeData(train_or_test, filename, actual, predicted, confusion, typicality,
         for i in range(0, len(predicted)):
             # Write data and similarity measures to file
             if train_or_test == "Training":
-                writer.writerow([set_data_array[i+id_start][2],\
-                                 actual[i][0], actual[i][1], actual[i][2], actual[i][3], actual[i][4],\
+                writer.writerow([actual[i][0],\
+                                 actual[i][1], actual[i][2], actual[i][3], actual[i][4], actual[i][5],\
                                  predicted[i][0], predicted[i][1], predicted[i][2], predicted[i][3], predicted[i][4],\
                                 ])
 
             else:
-                writer.writerow([set_data_array[i+id_start][2],\
-                                 actual[i][0], actual[i][1], actual[i][2], actual[i][3], actual[i][4],\
+                writer.writerow([actual[i][0],\
+                                 actual[i][1], actual[i][2], actual[i][3], actual[i][4], actual[i][5],\
                                  predicted[i][0], predicted[i][1], predicted[i][2], predicted[i][3], predicted[i][4],\
                                  typicality, agreement
                                 ])
 
-    # Computing aggregate confidence and credibility
-    confusion = getConfusionMatrix(predicted, actual, output_type)
-    myAccuracy = getAccuracy(confusion)
-
-    # Output to Console
-    print("\n" + train_or_test + "\n")
-    for row in confusion:
-        print(["{0:5.5}".format(str(val)) for val in row])
-    print("Accuracy: ", '{:.4f}'.format(float(myAccuracy)), "%")
-
-    # Output Confusion Matrices, Accuracies, AUCdt, and ROC AUC
-    print("\n\n", train_or_test, "Confusion Matrix", file=f)
-    for row in confusion:
-        print(["{0:5.5}".format(str(val)) for val in row], file=f)
-    print("Accuracy: ", '{:.4f}'.format(float(myAccuracy)), "%", file=f)
-
-    if train_or_test == "Testing":
-      print("Typicality: ", typicality, file=f)
-      print("Agreement: ", agreement, file=f)
+    # # Computing aggregate confidence and credibility
+    # confusion = getConfusionMatrix(predicted, actual, output_type)
+    # myAccuracy = getAccuracy(confusion)
+    #
+    # # Output to Console
+    # print("\n" + train_or_test + "\n")
+    # for row in confusion:
+    #     print(["{0:5.5}".format(str(val)) for val in row])
+    # print("Accuracy: ", '{:.4f}'.format(float(myAccuracy)), "%")
+    #
+    # # Output Confusion Matrices, Accuracies, AUCdt, and ROC AUC
+    # print("\n\n", train_or_test, "Confusion Matrix", file=f)
+    # for row in confusion:
+    #     print(["{0:5.5}".format(str(val)) for val in row], file=f)
+    # print("Accuracy: ", '{:.4f}'.format(float(myAccuracy)), "%", file=f)
+    #
+    # if train_or_test == "Testing":
+    #   print("Typicality: ", typicality, file=f)
+    #   print("Agreement: ", agreement, file=f)
 
 #####################################
 # DRAW THE DECISION TREE
@@ -699,7 +698,7 @@ f = open(f_name, "w")
 
 global typicality_file
 
-typicality_file=open("typicality_file.txt", "w")
+typicality_file=open("typicality_file" + str(pign_type) + ".csv", "w")
 
 importIdData("../../data/clean/LIDC_809_Complete.csv")
 
@@ -738,14 +737,22 @@ id_list = []
 for trn_ind, tst_ind in kf:
     trainLabels = []
     testLabels = []
+    test_ids = []
+    train_ids = []
     setTrain(LIDC_Data[trn_ind])
     test_features = LIDC_Data[tst_ind].tolist()
     for i in range(0, len(test_features)):
-      id_list.append(test_features[i][0])
-      test_features[i] = test_features[i][1:]
+        id_list.append(test_features[i][0])
+        test_ids.append(test_features[i][0])
+        test_features[i] = test_features[i][1:]
+    for i in range(0, len(train_features)):
+        train_ids.append(train_features[i][0])
+        train_features[i] = train_features[i][1:]
 
     # Get actual data
     actualTrain = getPigns(train_features)
+    #appending nodule id to acutal train
+    [actualTrain[i].insert(0,train_ids[i]) for i in range(0,len(actualTrain))]
     actualTest = getPigns(test_features)
 
     # Console Output
@@ -788,15 +795,25 @@ for trn_ind, tst_ind in kf:
 
     training_data = [train_conf_matrix, train_credibility, train_confidence, classes]
 
-    writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0, False)
+    writeData("Training", f_name[0:-4] + "_" + str(k_round) + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0, False)
 
+    writeData("Training", f_name[0:-4]  + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0, False)
+
+        #actualTrain = [x[1:] for x in actualTrain]
     ## P->A Heuristic (predicted to actual mapping for testing set)
     typicality, agreement = getPAActual(testLabels)
+
+    print("x: ", actualTest[0])
 
     conf_matrix = getConfusionMatrix(testLabels, actualTest, output_type)
     accuracy = getAccuracy(conf_matrix)
 
+    [actualTest[i].insert(0,test_ids[i]) for i in range(0,len(actualTest))]
+
+
     testing_data = [test_conf_matrix, test_credibility, test_confidence, classes]
+
+    writeData("Testing", f_name[0:-4] + "_" + str(k_round) + '_testing' + '.csv', actualTest, testLabels, testing_data[0], typicality, agreement, len(trainLabels), False)
 
     if accuracy > k_best[1]:
         k_best = [k_round, accuracy, actualTrain, trainLabels, actualTest, testLabels, training_data, testing_data, typicality, agreement]
@@ -814,13 +831,16 @@ testing_data = k_best[7]
 typicality = k_best[8]
 agreement = k_best[9]
 
+print(typicality_list)
+
 for i in range(0,len(typicality_list)):
     print(id_list[i], ", ", typicality_list[i], file=typicality_file)
+
 print(len(set(id_list)), file=typicality_file)
 
 print ("\nWriting Data for best fold k =", k_best[0], "...\n")
 
-# write training dataprint(len(set(id_list), file=typicality_file)
+# write training data
 writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLabels, training_data[0], training_data[1], training_data[2], 0, False)
 
 # write testing data

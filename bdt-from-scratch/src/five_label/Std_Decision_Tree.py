@@ -317,6 +317,23 @@ for trn_ind, tst_ind in kf:
     # increase round of k-fold vlaidation
     k_round += 1
 
+    importances = tree.feature_importances_
+    std = np.std(tree.feature_importances_,axis=0)
+    indices = np.argsort(importances)[::-1]
+    print("Feature ranking:")
+
+    for f in range(10):
+        print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
+
+    # Plot the feature importances of the forest
+    plt.figure()
+    plt.title("Feature importances")
+    plt.bar(range(10), importances[indices],
+           color="r",  align="center")
+    plt.xticks(range(10), indices)
+    plt.xlim([-1, 10])
+    plt.show()
+
 # Output data to text files
 accuracy = k_best[1]
 conf_mat = k_best[2]

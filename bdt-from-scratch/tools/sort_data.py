@@ -10,7 +10,7 @@ ifile  = open('../data/modeBalanced/typicality_file_1.csv', "rb")
 reader = csv.reader(ifile)
 ofile  = open('../data/modeBalanced/typicality_file_1_sorted.csv', "wb")
 writer = csv.writer(ofile, delimiter='\t')
- 
+
 rows = []
 typ = []
 reader.next()
@@ -27,6 +27,6 @@ print("typ: ", len(typ))
 
 for row in rows:
   writer.writerow(row)
- 
+
 ifile.close()
 ofile.close()

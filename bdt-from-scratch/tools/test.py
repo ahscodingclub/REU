@@ -1,34 +1,49 @@
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 
-data_a = [[1,2,5], [5,7,2,2,5], [7,2,5]]
-data_b = [[6,4,2], [1,2,5,3,2], [2,3,5,1]]
+from scipy.spatial import distance
+import numpy as np
+import csv
 
-mu = [3.93, 7.761, 14.319]
-alpha = [0.9996197532958419, 0.9702573729698682, 0.9375845650647818]
-ticks = ['A', 'B', 'C']
+#f = open("../data/modeBalanced/ModeBalanced_170_LIDC_809_Random.csv", 'r')
+f = open("test.csv")
+g = open("output.txt", 'w')
 
-def set_box_color(bp, color):
-    plt.setp(bp['boxes'], color=color)
-    plt.setp(bp['whiskers'], color=color)
-    plt.setp(bp['caps'], color=color)
-    plt.setp(bp['medians'], color=color)
+csv_f = csv.reader(f, delimiter=',')
+#skip the header row
+#csv_f.next()
 
-plt.figure()
+"""
+first run through of the file will save all of the
+information on the nodules of low typicality
 
-bpl = plt.boxplot(data_a, positions=np.array(xrange(len(data_a)))*2.0-0.4, sym='', widths=0.6)
-bpr = plt.boxplot(data_b, positions=np.array(xrange(len(data_b)))*2.0+0.4, sym='', widths=0.6)
-set_box_color(bpl, '#D7191C') # colors are from http://colorbrewer2.org/
-set_box_color(bpr, '#2C7BB6')
+second run will calculate the distance from every
+previously saved nodule to every other nodule
+"""
+x = []
+y = []
 
-# draw temporary red and blue lines and use them to create a legend
-plt.plot([], c='#D7191C', label='Apples')
-plt.plot([], c='#2C7BB6', label='Oranges')
-plt.legend()
+for row in csv_f:
+    x.append(float(row[0]))
+    y.append(float(row[1]))
 
-plt.xticks(xrange(0, len(ticks) * 2, 2), ticks)
-plt.xlim(-2, len(ticks)*2)
-plt.ylim(0, 8)
-plt.tight_layout()
+print("x: ", x)
+print("y: ", y)
 
-plt.savefig('figure.png')
+fig = plt.figure()
+
+ax = fig.add_subplot(111)
+ax.set_title('')
+for i in range(0, len(x)):
+    ax.plot([x[i]]*2, [-.5, .5], color="black")
+ax.set_ylim([-10,10])
+
+
+ax.spines['right'].set_color('none')
+ax.spines['bottom'].set_position('zero')
+
+# remove the ticks from the top and right edges
+ax.xaxis.set_ticks_position('bottom')
+ax.yaxis.set_ticks_position('left')
+
+plt.show()
