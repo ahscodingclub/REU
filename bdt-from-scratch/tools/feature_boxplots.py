@@ -2,6 +2,7 @@ import csv
 import matplotlib.pyplot as plt
 import numpy as np
 import re
+import sys
 
 """
 FEATURES
@@ -19,19 +20,40 @@ Circularity
 atyp_data = [[],[],[],[],[],[],[],[],[]]
 typ_data = [[],[],[],[],[],[],[],[],[]]
 
-#atypical by distance
-"""
-atyp_nodule_ids=[1.0, 4.0, 5.0, 6.0, 7.0, 8.0, 17.0, 1554.0, 1454.0, 2564.0, 1563.0, 1052.0, 1568.0, 33.0, 1058.0, 2086.0, 223.0, 47.0, 1073.0, 51.0, 52.0, 2615.0, 2616.0, 2106.0, 60.0, 1599.0, 65.0, 71.0, 2487.0, 98.0, 1102.0, 2640.0, 1537.0, 1109.0, 2646.0, 600.0, 601.0, 602.0, 603.0, 604.0, 1122.0, 443.0, 101.0, 102.0, 103.0, 104.0, 106.0, 1645.0, 113.0, 626.0, 629.0, 1144.0, 788.0, 2172.0, 637.0, 126.0, 643.0, 133.0, 134.0, 1607.0, 1679.0, 147.0, 661.0, 662.0, 1175.0, 665.0, 154.0, 668.0, 1695.0, 1051.0, 1704.0, 178.0, 694.0, 195.0, 2422.0, 1224.0, 203.0, 204.0, 205.0, 213.0, 727.0, 221.0, 222.0, 1247.0, 231.0, 2289.0, 1270.0, 760.0, 1273.0, 2298.0, 1275.0, 1279.0, 1293.0, 784.0, 786.0, 1300.0, 284.0, 1311.0, 2344.0, 2346.0, 2348.0, 733.0, 821.0, 315.0, 318.0, 2367.0, 2374.0, 839.0, 2377.0, 1869.0, 340.0, 2389.0, 343.0, 1370.0, 1375.0, 1900.0, 2415.0, 2416.0, 1393.0, 1394.0, 1395.0, 2420.0, 2421.0, 1910.0, 888.0, 890.0, 1922.0, 663.0, 1422.0, 912.0, 915.0, 916.0, 1689.0, 666.0, 929.0, 930.0, 936.0, 2375.0, 942.0, 943.0, 944.0, 945.0, 946.0, 1462.0, 1463.0, 1467.0, 446.0, 447.0, 450.0, 967.0, 968.0, 969.0, 2507.0, 1486.0, 1187.0, 761.0, 1496.0, 2521.0, 474.0, 477.0, 2016.0, 251.0, 1512.0, 2032.0, 168.0, 2039.0, 2554.0, 255.0, 853.0]
-"""
+args = sys.argv[1:]
 
-#atypical by BDT
-"""
-atyp_nodule_ids = [1025.0, 516.0, 2054.0, 523.0, 526.0, 88.0, 1042.0, 1558.0, 23.0, 2564.0, 1563.0, 1058.0, 1571.0, 549.0, 552.0, 1065.0, 1066.0, 1069.0, 51.0, 2100.0, 2616.0, 2618.0, 573.0, 62.0, 1599.0, 577.0, 1547.0, 1606.0, 1609.0, 77.0, 1103.0, 2640.0, 600.0, 1626.0, 92.0, 1117.0, 1630.0, 2143.0, 1122.0, 1467.0, 1126.0, 105.0, 2670.0, 112.0, 628.0, 1653.0, 2234.0, 637.0, 133.0, 647.0, 649.0, 651.0, 147.0, 661.0, 663.0, 665.0, 154.0, 1180.0, 1182.0, 2208.0, 2210.0, 2587.0, 168.0, 176.0, 1713.0, 178.0, 1203.0, 1210.0, 1723.0, 702.0, 705.0, 711.0, 1224.0, 714.0, 2423.0, 204.0, 717.0, 720.0, 721.0, 211.0, 725.0, 726.0, 732.0, 222.0, 223.0, 224.0, 1761.0, 226.0, 1251.0, 1252.0, 806.0, 231.0, 746.0, 748.0, 249.0, 251.0, 2090.0, 1790.0, 1791.0, 1294.0, 787.0, 283.0, 797.0, 798.0, 1413.0, 294.0, 815.0, 821.0, 1335.0, 1336.0, 829.0, 1854.0, 1855.0, 832.0, 2016.0, 2187.0, 1352.0, 330.0, 845.0, 335.0, 2387.0, 2389.0, 2391.0, 2404.0, 1767.0, 1900.0, 2109.0, 880.0, 881.0, 1399.0, 1913.0, 378.0, 894.0, 1685.0, 384.0, 1922.0, 899.0, 901.0, 907.0, 912.0, 914.0, 916.0, 1431.0, 921.0, 1436.0, 1787.0, 936.0, 942.0, 1967.0, 439.0, 1464.0, 443.0, 958.0, 457.0, 1486.0, 463.0, 1823.0, 1448.0, 485.0, 1511.0, 1512.0, 1002.0, 1007.0, 2032.0, 497.0, 2042.0, 1533.0, 2558.0, 1023.0]
-"""
+if len(args) == 0:
+    defin = int(input("Definition of typicality: \n1) Distance\n2) Typicality Rating\n3) Both\nchoice: "))
+    percent = float(input("Percentile of atypicality: "))/100
+elif len(args) == 2:
+    defin = int(args[0])
+    percent = float(args[1])/100
+else:
+    print("Command line arguments should contain: [Definition of typicality(1/2), Percentile of typicality(0-100)]")
 
-#intersection of atypical defintion
-atyp_nodule_ids = [51.0, 133.0, 147.0, 154.0, 168.0, 178.0, 204.0, 222.0, 223.0, 231.0, 251.0, 443.0, 600.0, 637.0, 661.0, 663.0, 665.0, 821.0, 912.0, 916.0, 936.0, 942.0, 1058.0, 1122.0, 1224.0, 1467.0, 1486.0, 1512.0, 1563.0, 1599.0, 1900.0, 1922.0, 2016.0, 2032.0, 2389.0, 2564.0, 2616.0, 2640.0]
+nodule_ids = []
+file_name = "atypical_nodules.csv"
+f = open(file_name)
+csv_in = csv.reader(f)
+csv_in.next()
+for row in csv_in:
+    nodule_ids.append([float(row[0]), float(row[2])])
+number_of_nodules = int(percent*len(nodule_ids))
+#setting appropriate atypical nodule ids
+atyp_nodule_ids = []
 
+if defin == 1:
+    atyp_nodule_ids = [x[0] for x in nodule_ids[0:number_of_nodules]]
+    defin = "distance"
+elif defin == 2:
+    atyp_nodule_ids = [x[1] for x in nodule_ids[0:number_of_nodules]]
+    defin = "typicality"
+elif defin == 3:
+    atyp_nodule_ids = set([x[0] for x in nodule_ids[0:number_of_nodules]]).intersection(set(x[1] for x in nodule_ids[0:number_of_nodules]))
+    defin = "both"
+
+
+print("atyp: ", atyp_nodule_ids)
 f = open("../data/modeBalanced/ModeBalanced_170_LIDC_809_Random.csv", 'r')
 csv_f = csv.reader(f, delimiter=",")
 csv_f.next()
@@ -69,5 +91,12 @@ titles = ["gabormean_0_2", "IntensityDifference", "MaxIntensity", "SDIntensity",
 for i in range(0, len(atyp_data)):
   plt.figure()
   plt.title(titles[i])
+  plt.hist([typ_data[i], atyp_data[i]])
+  plt.savefig(str(defin)+"_"+str(percent)+"_"+titles[i]+"_hist"+'.png')
+
+
+for i in range(0, len(atyp_data)):
+  plt.figure()
+  plt.title(titles[i])
   plt.boxplot([typ_data[i], atyp_data[i]])
-  plt.savefig(titles[i]+'.png')
+  plt.savefig(str(defin)+"_"+str(percent)+"_"+titles[i]+'.png')

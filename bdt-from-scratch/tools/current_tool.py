@@ -1,11 +1,11 @@
 import csv
 
 file_name = "atypical_nodules.csv"
-column = 2
+column = 0
 
 f = open(file_name, 'r')
 csv_in = csv.reader(f)
-csv_in.next() #skip the header row
+csv_in.next()
 
 l = []
 
@@ -17,11 +17,19 @@ f.close()
 f = open(file_name, 'w')
 csv_out = csv.writer(f)
 
-for i in range(0, len(l)):
-    if count(l[i] > 1):
-        del l[i]
+#remove all duplicates
+seen = set()
+seen_add = seen.add
+l = [x for x in l if not (x in seen or seen_add(x))]
 
-#filter all duplicates
+print("length of l: ", len(l))
+print("length of set l: ", len(set(l)))
+
+for x in l:
+    if l.count(x) > 1:
+        print("x: ", x)
+
+
 for row in l:
     csv_out.writerow([row])
 

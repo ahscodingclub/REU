@@ -698,7 +698,7 @@ f = open(f_name, "w")
 
 global typicality_file
 
-typicality_file=open("typicality_file" + str(pign_type) + ".csv", "w")
+typicality_file=open("typicality_file_" + str(pign_type) + ".csv", "w")
 
 importIdData("../../data/clean/LIDC_809_Complete.csv")
 
