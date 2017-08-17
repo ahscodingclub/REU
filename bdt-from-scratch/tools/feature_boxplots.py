@@ -68,28 +68,12 @@ for row in csv_f:
     if float(row[0]) == x:
       atyp = True
 
-  if atyp:
-    atyp_data[0].append(float(row[35]))
-    atyp_data[1].append(float(row[25]))
-    atyp_data[2].append(float(row[18]))
-    atyp_data[3].append(float(row[20]))
-    atyp_data[4].append(float(row[9]))
-    atyp_data[5].append(float(row[26]))
-    atyp_data[6].append(float(row[22]))
-    atyp_data[7].append(float(row[24]))
-    atyp_data[8].append(float(row[13]))
+      for i in range(0, len(titles)):
+        if atyp:
+            atyp_data[i].append(float(row[i+1]))
 
-  else:
-    typ_data[0].append(float(row[35]))
-    typ_data[1].append(float(row[25]))
-    typ_data[2].append(float(row[18]))
-    typ_data[3].append(float(row[20]))
-    typ_data[4].append(float(row[9]))
-    typ_data[5].append(float(row[26]))
-    typ_data[6].append(float(row[22]))
-    typ_data[7].append(float(row[24]))
-    typ_data[8].append(float(row[13]))
-
+        else:
+            typ_data[i].append(float(row[i+1]))
 
 for i in range(0, len(atyp_data)):
   plt.figure()
