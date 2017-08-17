@@ -85,7 +85,6 @@ for row in csv_f:
     typ_data[6].append(float(row[22]))
     typ_data[7].append(float(row[24]))
     typ_data[8].append(float(row[13]))
-#new
 
 titles = ["gabormean_0_2", "IntensityDifference", "MaxIntensity", "SDIntensity", "Compactness", "markov1", "MaxIntensityBG", "SDIntensityBG", "Circularity"]
 
