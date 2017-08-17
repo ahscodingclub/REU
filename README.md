@@ -11,6 +11,14 @@ Final Presentation
 Tutorial.ipynb -- Jupyter notebook tutorial of project
 
 bdt-from-scratch: 
+          
+    data:
+    documents: 
+    figures:
+    output: 
+    papers: 
+    src: 
+    tools:      
 
 lectures: 
 
