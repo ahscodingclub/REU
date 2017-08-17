@@ -6,8 +6,8 @@ import sys
 
 titles = ['Area', 'ConvexArea', 'Perimeter', 'ConvexPerimeter', 'EquivDiameter', 'MajorAxisLength', 'MinorAxisLength', 'Elongation', 'Compactness', 'Eccentricity', 'Solidity', 'Extent', 'Circularity', 'RadialDistanceSD', 'SecondMoment', 'Roughness', 'MinIntensity', 'MaxIntensity', 'MeanIntensity', 'SDIntensity', 'MinIntensityBG', 'MaxIntensityBG', 'MeanIntensityBG', 'SDIntensityBG', 'IntensityDifference', 'markov1', 'markov2', 'markov3', 'markov4', 'markov5', 'gabormean_0_0', 'gaborSD_0_0', 'gabormean_0_1', 'gaborSD_0_1', 'gabormean_0_2', 'gaborSD_0_2', 'gabormean_1_0', 'gaborSD_1_0', 'gabormean_1_1', 'gaborSD_1_1', 'gabormean_1_2', 'gaborSD_1_2', 'gabormean_2_0', 'gaborSD_2_0', 'gabormean_2_1', 'gaborSD_2_1', 'gabormean_2_2', 'gaborSD_2_2', 'gabormean_3_0', 'gaborSD_3_0', 'gabormean_3_1', 'gaborSD_3_1', 'gabormean_3_2', 'gaborSD_3_2', 'Contrast', 'Correlation', 'Energy', 'Homogeneity', 'Entropy', 'x_3rdordermoment', 'Inversevariance', 'Sumaverage', 'Variance', 'Clustertendency', 'MaxProbability']
 
-atyp_data = [[]*len(titles)]
-typ_data = [[]*len(titles)]
+atyp_data = [[None]*len(titles)]
+typ_data = [[None]*len(titles)]
 
 """
 Recieving the command line arguments and
@@ -58,22 +58,29 @@ f = open("../data/modeBalanced/ModeBalanced_170_LIDC_809_Random.csv", 'r')
 csv_f = csv.reader(f, delimiter=",")
 csv_f.next()
 
+
 """
 Acessing the associated features of precaclulated
 typical and atypical nodule ids
 """
 for row in csv_f:
-  atyp = False
-  for x in atyp_nodule_ids:
-    if float(row[0]) == x:
-      atyp = True
+    print("len of row: ", len(row))
+    print("len of titles: ", len(titles))
+    atyp = False
+    for x in atyp_nodule_ids:
+        if float(row[0]) == x:
+            atyp = True
 
-      for i in range(0, len(titles)):
-        if atyp:
-            atyp_data[i].append(float(row[i+1]))
+        for i in range(0, len(titles)):
+            print("i: ", i)
+            print("x: ", typ_data[i])
+            print("y: ", row[i])
+            if atyp:
+                atyp_data[i].append(float(row[i+1]))
 
-        else:
-            typ_data[i].append(float(row[i+1]))
+            else:
+                typ_data[i].append(float(row[i+1]))
+
 
 for i in range(0, len(atyp_data)):
   plt.figure()
