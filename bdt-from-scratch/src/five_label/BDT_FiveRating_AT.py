@@ -32,6 +32,7 @@ import pydot # Plotting decision trees
 import pandas as pd # Don't delete this. Just don't.
 import numpy as np # Numpy arrays
 import matplotlib
+import pickle
 
 #set the display to default display
 #so no errors when run on a server
@@ -57,10 +58,8 @@ with warnings.catch_warnings():
 # IMPORT DATA
 def importIdData(set_name):
     global set_data_array
-    global set_header
 
-    id_data  = pd.read_csv(set_name, header =0)
-    set_header = list(id_data.columns.values)
+    id_data  = pd.read_csv(set_name, header=0)
     id_data = id_data._get_numeric_data()
     set_data_array = id_data.as_matrix()
 
@@ -68,8 +67,10 @@ def importAllData(set_name):
     global LIDC_Data
     global header
 
-    LIDC_Data  = pd.read_csv(set_name, header =0)
-    header = list(LIDC_Data.columns.values)[:-4]
+    LIDC_Data  = pd.read_csv(set_name, header=0)
+    print("setting header")
+    header = list(LIDC_Data.columns.values)[1:-4]
+    print(header)
     LIDC_Data = LIDC_Data._get_numeric_data()
     LIDC_Data = LIDC_Data.as_matrix()
 
@@ -280,14 +281,13 @@ def createTree(dataset, labels, min_parent, min_child, curr_depth, max_depth):
         return
 
 #####################################
-# CLASSIFY NEW CASES
+#  NEW CASES
 #####################################
 def classify(inputTree, featLabels, testVec):
     firstStr = inputTree.keys()[0]
 
     if (firstStr == 'Leaf'): # IF LEAF NODE, RETURN BBA VECTOR
-        bba = inputTree['Leaf'].values()[0]
-        return bba
+        return inputTree['Leaf'].values()[0]
 
     elif (firstStr == 'right' or firstStr == 'left'): # IF RIGHT OR LEFT, RECURSIVE CALL ON SUBTREE OF THAT NODE
         return classify(inputTree[firstStr],featLabels,testVec)
@@ -712,7 +712,7 @@ if(var_set == "n"):
 elif(var_set == "y"):
     importAllData("../../data/modeBalanced/testing_file.csv")
 
-test_header = copy.copy(header)
+test_header = [copy.deepcopy(x) for x in header]
 
 ###### K-FOLD VALIDATION ######
 kf = KFold(len(LIDC_Data), kfolds)
@@ -762,10 +762,11 @@ for trn_ind, tst_ind in kf:
     print("Test Size: ", len(test_features))
     print ("Building Belief Decision Tree...")
 
+
     # Create Tree
     # setting "switch = True" will make new tree each time
     tree = getTrees(train_features, header, nparent, nchild, 0, maxdepth, True)
-
+    print(header)
     #graphing the tree
 #    graph = pydot.Dot(graph_type='graph')
 #    visit(tree)
@@ -803,13 +804,10 @@ for trn_ind, tst_ind in kf:
     ## P->A Heuristic (predicted to actual mapping for testing set)
     typicality, agreement = getPAActual(testLabels)
 
-    print("x: ", actualTest[0])
-
     conf_matrix = getConfusionMatrix(testLabels, actualTest, output_type)
     accuracy = getAccuracy(conf_matrix)
 
     [actualTest[i].insert(0,test_ids[i]) for i in range(0,len(actualTest))]
-
 
     testing_data = [test_conf_matrix, test_credibility, test_confidence, classes]
 
@@ -818,8 +816,13 @@ for trn_ind, tst_ind in kf:
     if accuracy > k_best[1]:
         k_best = [k_round, accuracy, actualTrain, trainLabels, actualTest, testLabels, training_data, testing_data, typicality, agreement]
 
+    #save the tree
+    with open('tree_' + str(pign_type) + '_' + str(k_round) + '.pkl', 'wb') as f:
+        pickle.dump(tree, f, pickle.HIGHEST_PROTOCOL)
+
     # increase round of k-fold vlaidation
     k_round += 1
+
 
 # Output data to csv and text files
 actualTrain = k_best[2]
@@ -846,7 +849,6 @@ writeData("Training", f_name[0:-4] + '_training' + '.csv', actualTrain, trainLab
 # write testing data
 writeData("Testing", f_name[0:-4] + '_testing' + '.csv', actualTest, testLabels, testing_data[0], typicality, agreement, len(trainLabels), False)
 
-print("unique cases: ", len(set(id_list)), file=f)
 # Close output file
 f.close()
 typicality_file.close()
