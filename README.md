@@ -10,18 +10,26 @@ Midterm Presentation
 Final Presentation
 Tutorial.ipynb -- Jupyter notebook tutorial of project
 
+2016_REU_Documents -- Predecessing work done in the previous year REU
+
+REU Papers -- Most of the scholarly papers collected for research on
+              this project
+
 bdt-from-scratch: 
           
-    data:
-    documents: 
-    figures:
+    data -- the data used for training the BDT, most used is the 
+            modeBalanced Directory
+
+    figures -- feature boxplots generated to attempt to find one 
+               discriminating feature between typical and atypical  
+               nodules
     output: 
-    papers: 
     src: 
     tools:      
 
-lectures: 
+lectures -- notes taken on lectures presenented during this REU program
 
-literature reviews: 
+literature reviews -- a few structured literature reviews taken from 
+                      papers from the REU Papers directory 
 
 
