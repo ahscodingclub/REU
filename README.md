@@ -57,6 +57,17 @@ bdt-from-scratch:
           LDA -- Linear Discriminant Analysis on most discerning feature of atypical nodules
           MDS -- Mulidimensional Scaling for ^^
           distance_boxplot -- typcical vs. atypical case boxplots based on sum of pairwise distances
+          feature_boxplots -- boxplots between typical and atypical cases by every feature
+          feature_distributions -- historgram of feature values, typical vs. atypical
+          pairwise_distances -- calculates the sum of pairwise distances from each nodule
+                                to every other nodule
+          plotting -- plots the final graph of this project comparing all consensus techniques 
+                      over 2 models
+          remove_duplicates -- removes duplicate nodules from a file while preserving order
+          rule_generator -- generates the rule for all atypical nodules classified in the tree
+          test_median -- testing the fastest way to calculate the median consensus
+          test_mode -- testing the fastest way to calculate the mode consensus
+          
 
 lectures -- notes taken on lectures presenented during this REU program
 
