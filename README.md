@@ -1,5 +1,9 @@
-# REU
+![Summer 2017 REU poster](https://github.com/jakesauter/REU/blob/master/Summer_2017_poster.jpg)
+
+# MedIX REU
 Word done at Medix NSF REU in Summer 2017
+
+# Project Structure
 
 The file structure is layed out as following way:
 
